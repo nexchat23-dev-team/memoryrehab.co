@@ -2053,21 +2053,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize button price immediately
     updatePdpPrice();
 
-    pdpQtyMinus?.addEventListener('click', () => {
-      if (pdpQty > 1) {
-        pdpQty -= 1;
+    if (pdpQtyMinus && !pdpQtyMinus.dataset.bound) {
+      pdpQtyMinus.dataset.bound = 'true';
+      pdpQtyMinus.addEventListener('click', () => {
+        if (pdpQty > 1) {
+          pdpQty -= 1;
+          updatePdpPrice();
+        }
+      });
+    }
+
+    if (pdpQtyPlus && !pdpQtyPlus.dataset.bound) {
+      pdpQtyPlus.dataset.bound = 'true';
+      pdpQtyPlus.addEventListener('click', () => {
+        pdpQty += 1;
         updatePdpPrice();
-      }
-    });
+      });
+    }
 
-    pdpQtyPlus?.addEventListener('click', () => {
-      pdpQty += 1;
-      updatePdpPrice();
-    });
-
-    pdpAddBagBtn?.addEventListener('click', () => {
-      addToCart(prod, pdpQty);
-    });
+    if (pdpAddBagBtn && !pdpAddBagBtn.dataset.bound) {
+      pdpAddBagBtn.dataset.bound = 'true';
+      pdpAddBagBtn.addEventListener('click', () => {
+        addToCart(prod, pdpQty);
+      });
+    }
 
     // PDP Routine Wishlist Toggle
     const pdpWishlistBtn = document.getElementById('pdpWishlistBtn');

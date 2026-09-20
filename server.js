@@ -483,6 +483,25 @@ async function handleRequest(req, res) {
     }
   }
 
+  // ── MIME TYPES DICTIONARY ──
+  const MIME_TYPES = {
+    '.html': 'text/html; charset=utf-8',
+    '.css': 'text/css; charset=utf-8',
+    '.js': 'application/javascript; charset=utf-8',
+    '.json': 'application/json; charset=utf-8',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.png': 'image/png',
+    '.webp': 'image/webp',
+    '.svg': 'image/svg+xml',
+    '.ico': 'image/x-icon',
+    '.mp4': 'video/mp4',
+    '.mov': 'video/quicktime',
+    '.woff2': 'font/woff2',
+    '.woff': 'font/woff',
+    '.ttf': 'font/ttf'
+  };
+
   // ── STATIC FILE SERVING WITH RANGE / STREAMING (MP4 videos) ──
   let relativePath = pathname === '/' ? 'index.html' : pathname.replace(/^\//, '');
 

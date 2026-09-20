@@ -53,6 +53,33 @@
     <link rel="stylesheet" href="css/mobile-upgrade.css" />
     <link rel="stylesheet" href="css/effects.css" />
 
+    <!-- Synchronous Product Catalog & Instant Preloader -->
+    <script src="products-config.js"></script>
+    <script>
+      (function() {
+        try {
+          var params = new URLSearchParams(window.location.search);
+          var pid = params.get('id') || '1';
+          var catalog = window.MEMORY_REHAB_CATALOG || {};
+          try {
+            var rawCustom = localStorage.getItem('mr_custom_products');
+            if (rawCustom) catalog = Object.assign({}, catalog, JSON.parse(rawCustom));
+          } catch (e) {}
+          var prod = catalog[pid] || catalog['1'] || {};
+          window.__ACTIVE_PDP_PROD = prod;
+          if (prod.name) {
+            document.title = prod.name + ' | Memory Rehab Lab';
+          }
+          if (prod.image) {
+            var preloadImg = document.createElement('link');
+            preloadImg.rel = 'preload';
+            preloadImg.as = 'image';
+            preloadImg.href = prod.image;
+            document.head.appendChild(preloadImg);
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <!-- Top Viewport Reading Progress Bar -->
@@ -206,38 +233,32 @@
         <!-- Gallery Showcase -->
         <div class="pdp-gallery-wrap">
           <div class="pdp-main-img-box">
-            <img id="pdpMainImg" src="photo_2026-09-09_17-33-58.jpg" alt="Product Image" />
+            <img id="pdpMainImg" src="" alt="Product Image" style="transition: opacity 0.2s ease;" />
           </div>
         </div>
 
         <!-- Sticky Buy Box -->
         <div class="pdp-buy-box">
-          <span class="pdp-step-badge" id="pdpStepBadge">Step 3: Hydrate & Lock</span>
-          <span class="skin-type-tag" id="pdpSkinType"><img src="favicon-32x32.png" class="tag-favicon" alt="" width="14" height="14" /> For: Dry / Compromised Barrier</span>
+          <span class="pdp-step-badge" id="pdpStepBadge"></span>
+          <span class="skin-type-tag" id="pdpSkinType"><img src="favicon-32x32.png" class="tag-favicon" alt="" width="14" height="14" /> <span id="pdpSkinTypeText"></span></span>
           
-          <h1 class="pdp-title" id="pdpTitle">Faerie Dew™ Barrier Face Cream</h1>
+          <h1 class="pdp-title" id="pdpTitle"></h1>
           
           <div class="pdp-ratings-row">
             <span class="stars">★★★★★</span>
-            <strong id="pdpRatingNum">4.9</strong>
-            <span id="pdpReviewCount">(168 verified customer reviews)</span>
+            <strong id="pdpRatingNum"></strong>
+            <span id="pdpReviewCount"></span>
           </div>
 
           <div class="pdp-price-row">
-            <span class="pdp-price" id="pdpPrice">₦42,000</span>
-            <span class="pdp-orig-price" id="pdpOrigPrice">₦52,000</span>
-            <span class="pdp-discount-pill" id="pdpDiscountPill">SAVE 19%</span>
+            <span class="pdp-price" id="pdpPrice"></span>
+            <span class="pdp-orig-price" id="pdpOrigPrice"></span>
+            <span class="pdp-discount-pill" id="pdpDiscountPill" style="display: none;"></span>
           </div>
 
-          <p class="pdp-summary" id="pdpDescription">
-            Deeply restorative lipid cream formulated with botanical ceramides, cold-pressed raspberry seed, and soothing plant sterols to rebuild compromised skin barriers.
-          </p>
+          <p class="pdp-summary" id="pdpDescription"></p>
 
-          <div class="card-ingredient-chips" id="pdpIngredientChips">
-            <span class="ingredient-chip">Ceramides</span>
-            <span class="ingredient-chip">Raspberry Seed</span>
-            <span class="ingredient-chip">Soothe Complex</span>
-          </div>
+          <div class="card-ingredient-chips" id="pdpIngredientChips"></div>
 
           <!-- Quantity Stepper & Add to Bag -->
           <div class="pdp-stepper-row">
@@ -247,7 +268,7 @@
               <button type="button" class="pdp-qty-btn" id="pdpQtyPlus">+</button>
             </div>
             <button type="button" class="btn-primary pdp-add-bag-btn" id="pdpAddBagBtn">
-              Add To Routine Bag • <span id="pdpBtnPrice">₦42,000</span>
+              Add To Routine Bag • <span id="pdpBtnPrice"></span>
             </button>
           </div>
 
@@ -267,6 +288,66 @@
         </div>
       </section>
 
+      <!-- Instant Synchronous Hydration (Executes during HTML parse before first paint) -->
+      <script>
+        (function() {
+          var prod = window.__ACTIVE_PDP_PROD;
+          if (!prod || !prod.name) {
+            var params = new URLSearchParams(window.location.search);
+            var pid = params.get('id') || '1';
+            var catalog = window.MEMORY_REHAB_CATALOG || {};
+            try {
+              var raw = localStorage.getItem('mr_custom_products');
+              if (raw) catalog = Object.assign({}, catalog, JSON.parse(raw));
+            } catch(e) {}
+            prod = catalog[pid] || catalog['1'] || {};
+          }
+          if (!prod || !prod.name) return;
+
+          function fmt(n) {
+            return '₦' + Number(n).toLocaleString('en-NG', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+          }
+
+          var el;
+          if (el = document.getElementById('pdpTitle')) el.textContent = prod.name;
+          if (el = document.getElementById('pdpBreadcrumbCurrent')) el.textContent = prod.name;
+          if (el = document.getElementById('pdpMainImg')) {
+            el.src = prod.image;
+            el.alt = prod.name;
+          }
+          if (el = document.getElementById('pdpStepBadge')) el.textContent = prod.step;
+          if (el = document.getElementById('pdpSkinTypeText')) {
+            var clean = (prod.skinType || 'For: All Skin Types').replace(/^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\s]+/u, '');
+            el.textContent = clean;
+          }
+          if (el = document.getElementById('pdpRatingNum')) el.textContent = prod.rating || '4.9';
+          if (el = document.getElementById('pdpReviewCount')) el.textContent = '(' + (prod.reviews || 0) + ' verified customer reviews)';
+          if (el = document.getElementById('pdpPrice')) el.textContent = fmt(prod.price);
+          if (el = document.getElementById('pdpOrigPrice')) el.textContent = fmt(prod.originalPrice || prod.price);
+          if (el = document.getElementById('pdpBtnPrice')) el.textContent = fmt(prod.price);
+          
+          var orig = prod.originalPrice || prod.price;
+          if (el = document.getElementById('pdpDiscountPill')) {
+            if (orig > prod.price) {
+              var pct = Math.round(((orig - prod.price) / orig) * 100);
+              el.textContent = 'SAVE ' + pct + '%';
+              el.style.display = 'inline-block';
+            } else {
+              el.style.display = 'none';
+            }
+          }
+          if (el = document.getElementById('pdpDescription')) el.textContent = prod.summary || '';
+          
+          if (el = document.getElementById('pdpIngredientChips')) {
+            if (prod.ingredients && prod.ingredients.length) {
+              el.innerHTML = prod.ingredients.map(function(i) {
+                return '<span class="ingredient-chip">' + i + '</span>';
+              }).join('');
+            }
+          }
+        })();
+      </script>
+
       <!-- 2. DEEP SCROLL SECTION: CLINICAL BARRIER RECOVERY METRICS -->
       <section class="pdp-deep-section">
         <h2 class="pdp-section-heading">Clinical Barrier Results</h2>
@@ -274,16 +355,16 @@
         
         <div class="pdp-metrics-grid">
           <div class="pdp-metric-glass-card">
-            <span class="metric-big-number" id="metric1Val">96%</span>
-            <p class="metric-description" id="metric1Desc">Noticed redness, irritation, and skin stinging calmed in 7 days</p>
+            <span class="metric-big-number" id="metric1Val"></span>
+            <p class="metric-description" id="metric1Desc"></p>
           </div>
           <div class="pdp-metric-glass-card">
-            <span class="metric-big-number" id="metric2Val">98%</span>
-            <p class="metric-description" id="metric2Desc">Reported continuous 48-hour deep hydration without heaviness</p>
+            <span class="metric-big-number" id="metric2Val"></span>
+            <p class="metric-description" id="metric2Desc"></p>
           </div>
           <div class="pdp-metric-glass-card">
-            <span class="metric-big-number" id="metric3Val">92%</span>
-            <p class="metric-description" id="metric3Desc">Observed smoother skin texture and total elimination of dry flaking</p>
+            <span class="metric-big-number" id="metric3Val"></span>
+            <p class="metric-description" id="metric3Desc"></p>
           </div>
         </div>
       </section>
@@ -328,9 +409,7 @@
         <p class="pdp-section-subhead">100% clean, vegan, cruelty-free, and formulated without synthetic dyes or petroleum:</p>
 
         <div class="pdp-inci-glass-box">
-          <p class="pdp-inci-text" id="pdpInciText">
-            Aqua (Water), Rubus Idaeus (Cold-Pressed Raspberry) Seed Oil, Ceramide NP, Ceramide AP, Phytosphingosine, Squalane, Butyrospermum Parkii (Shea) Butter, Hyaluronic Acid, Glycerin, Camellia Sinensis (Green Tea) Leaf Extract, Allantoin, Tocopherol (Vitamin E), Ethylhexylglycerin, Phenoxyethanol.
-          </p>
+          <p class="pdp-inci-text" id="pdpInciText"></p>
         </div>
       </section>
 
@@ -595,7 +674,6 @@
     <!-- Toast Notification Container -->
     <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
-    <script src="products-config.js"></script>
     <script src="script.js"></script>
 
     <!-- ═══════════════════════════════════════════════════
