@@ -15,7 +15,7 @@ const SHIPPING_PROVIDER = (process.env.SHIPPING_PROVIDER || 'shippo').toLowerCas
 
 function calculateFallbackShipping(subtotal, countryCode) {
   const total = Number(subtotal || 0);
-  const freeThreshold = Number(process.env.FREE_SHIPPING_THRESHOLD || 60000);
+  const freeThreshold = Number(process.env.FREE_SHIPPING_THRESHOLD || 70000);
   if (total >= freeThreshold) return 0.0;
   const country = (countryCode || 'NG').toUpperCase();
 
@@ -62,33 +62,80 @@ async function getShippingRate({ amount, countryCode, postalCode, address }) {
       async: false
     };
 
-    const resp = await fetch('https://api.goshippo.com/shipments/', {
-      method: 'POST',
-      headers: {
-        'Authorization': `ShippoToken ${SHIPPO_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
+    let resp, data, rates = [];
 
-    const data = await resp.json();
-    const results = Array.isArray(data?.results) ? data.results : [];
-    const rates = results.flatMap(item => Array.isArray(item?.rates) ? item.rates : []);
+    if (SHIPPING_PROVIDER === 'easypost') {
+      // EasyPost expects a shipments create call
+      const epPayload = {
+        to_address: {
+          country: destination.country,
+          zip: destination.zip,
+          state: destination.state,
+          city: destination.city,
+          street1: destination.street1
+        },
+        from_address: {
+          country: 'NG',
+          zip: '100001',
+          state: 'Lagos',
+          city: 'Lagos',
+          street1: 'Memory Rehab Lab'
+        },
+        parcel: {
+          length: '8',
+          width: '6',
+          height: '4',
+          weight: '2.5',
+          mass_unit: 'lb',
+          distance_unit: 'in'
+        }
+      };
+
+      resp = await fetch('https://api.easypost.com/v2/shipments', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${SHIPPO_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(epPayload)
+      });
+
+      data = await resp.json();
+      rates = Array.isArray(data?.rates) ? data.rates : Array.isArray(data?.shipment?.rates) ? data.shipment.rates : [];
+    } else {
+      // default: Shippo
+      resp = await fetch('https://api.goshippo.com/shipments/', {
+        method: 'POST',
+        headers: {
+          'Authorization': `ShippoToken ${SHIPPO_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      data = await resp.json();
+      const results = Array.isArray(data?.results) ? data.results : [];
+      rates = results.flatMap(item => Array.isArray(item?.rates) ? item.rates : []);
+    }
+
     const selected = rates
-      .filter(rate => Number(rate?.amount) > 0)
-      .sort((a, b) => Number(a.amount) - Number(b.amount))[0];
+      .filter(rate => Number(rate?.amount || rate?.rate || 0) > 0)
+      .sort((a, b) => Number((a.amount || a.rate || 0)) - Number((b.amount || b.rate || 0)))[0];
 
     if (!selected) {
       return { amount: fallback, currency: 'NGN', provider: SHIPPING_PROVIDER, fallback: true };
     }
 
-    const rateAmount = Number(selected.amount || fallback);
+    const amountValue = Number(selected.amount || selected.rate || fallback);
+    const currencyValue = (selected.currency || selected.currency_code || process.env.SHIPPING_CURRENCY || 'NGN').toUpperCase();
+    const labelValue = selected.servicelevel_name || selected.servicelevel?.name || selected.service || `${selected.carrier || ''} ${selected.service || ''}`.trim() || 'Carrier rate';
+
     return {
-      amount: Number(rateAmount.toFixed(2)),
-      currency: (selected.currency || process.env.SHIPPING_CURRENCY || 'NGN').toUpperCase(),
+      amount: Number(amountValue.toFixed(2)),
+      currency: currencyValue,
       provider: SHIPPING_PROVIDER,
       fallback: false,
-      label: selected.servicelevel_name || selected.servicelevel?.name || 'Carrier rate'
+      label: labelValue
     };
   } catch (err) {
     console.warn('Shipping quote fetch failed:', err.message);
@@ -102,8 +149,8 @@ const defaultStore = {
     storeTagline: process.env.STORE_TAGLINE || 'Botanical Skincare',
     promoCode: process.env.STORE_PROMO_CODE || 'GLOW15',
     promoDiscount: Number(process.env.STORE_PROMO_DISCOUNT || 15),
-    freeShippingThreshold: Number(process.env.FREE_SHIPPING_THRESHOLD || 60000),
-    announcement: process.env.STORE_ANNOUNCEMENT || 'Free Express Shipping On Orders ₦60,000+ • 100% Clean Biocompatible Actives',
+    freeShippingThreshold: Number(process.env.FREE_SHIPPING_THRESHOLD || 70000),
+    announcement: process.env.STORE_ANNOUNCEMENT || 'Free Express Shipping On Orders ₦70,000+ • 100% Clean Biocompatible Actives',
     heroEyebrow: process.env.HERO_EYEBROW || 'Step-by-Step Clinical Care',
     heroHeadline: process.env.HERO_HEADLINE || 'Healthy skin starts with a rehabilitated barrier.',
     heroDescription: process.env.HERO_DESCRIPTION || 'No complicated million-step routines. Memory Rehab simplifies barrier repair into a targeted 3-product routine designed to soothe inflammation, replenish and lock in hydration, and support the repair of your skin barrier.',

@@ -23,7 +23,7 @@ const STORE_CONFIG = {
   footerTagline: 'Crafted with botanical purity & clinical precision.',
   promoCode: 'GLOW15',
   promoDiscount: 15,
-  freeShippingThreshold: 60000.00,
+  freeShippingThreshold: 70000.00,
   currencySymbol: '₦',
   whatsappNumber: '+2349112488271',
   whatsappDisplay: '+234 911 248 8271',
@@ -35,7 +35,7 @@ const STORE_CONFIG = {
   announcements: [
     'WhatsApp Orders & Support: +234 911 248 8271',
     'Follow @memoryrehab.co on Instagram & TikTok',
-    'Free Express Shipping On Orders ₦60,000+ • 100% Clean Biocompatible Actives',
+    'Free Express Shipping On Orders ₦70,000+ • 100% Clean Biocompatible Actives',
     '100% Clean Biocompatible Actives',
     'Dermatologist Approved Barrier Repair',
     'Cruelty-Free and Vegan Certified'

@@ -239,7 +239,7 @@
 
             <div class="admin-field-group">
               <label class="admin-label" for="settingAnnouncement">Announcement Ticker Text</label>
-              <input type="text" id="settingAnnouncement" class="admin-input" value="Free Express Shipping On Orders ₦60,000+ • 100% Clean Biocompatible Actives" />
+              <input type="text" id="settingAnnouncement" class="admin-input" value="Free Express Shipping On Orders ₦70,000+ • 100% Clean Biocompatible Actives" />
             </div>
 
             <div class="admin-field-group">
@@ -254,7 +254,8 @@
 
             <div class="admin-field-group">
               <label class="admin-label" for="settingShippingThreshold">Free Shipping Threshold (₦)</label>
-              <input type="number" id="settingShippingThreshold" class="admin-input" value="60000" min="1000" />
+              <input type="number" id="settingShippingThreshold" class="admin-input" value="70000" min="1000" step="1000" />
+              <small style="color: var(--text-muted); font-size: 0.76rem; margin-top: 4px; display: block;">Orders equal or above this amount get Free Express Shipping across Nigeria.</small>
             </div>
 
             <div class="admin-field-group">
@@ -2054,7 +2055,7 @@
         const announcement = document.getElementById('settingAnnouncement')?.value.trim() || '';
         const promoCode = document.getElementById('settingPromoCode')?.value.trim().toUpperCase() || 'GLOW15';
         const promoDiscount = parseInt(document.getElementById('settingDiscountPercent')?.value, 10) || 15;
-        const freeShippingThreshold = parseFloat(document.getElementById('settingShippingThreshold')?.value) || 60000;
+        const freeShippingThreshold = parseFloat(document.getElementById('settingShippingThreshold')?.value) || 70000;
         const whatsappNumber = document.getElementById('settingWhatsApp')?.value.trim() || '+2349112488271';
         const instagramHandle = document.getElementById('settingInstagram')?.value.trim() || 'memoryrehab.co';
         const tiktokHandle = document.getElementById('settingTikTok')?.value.trim() || 'memoryrehab.co';
@@ -2236,10 +2237,10 @@
           const settingsData = {
             storeName: 'Memory Rehab Lab',
             storeTagline: 'Botanical Skincare',
-            announcement: 'Free Express Shipping On Orders ₦60,000+ • 100% Clean Biocompatible Actives',
+            announcement: 'Free Express Shipping On Orders ₦70,000+ • 100% Clean Biocompatible Actives',
             promoCode: 'GLOW15',
             promoDiscount: 15,
-            freeShippingThreshold: 60000.00,
+            freeShippingThreshold: 70000.00,
             heroEyebrow: 'Step-by-Step Clinical Care',
             heroHeadline: 'Healthy skin starts with a rehabilitated barrier.',
             heroDescription: 'No complicated million-step routines. Memory Rehab simplifies barrier repair into a targeted 3-product routine designed to soothe inflammation, replenish and lock in hydration, and support the repair of your skin barrier.',
@@ -2367,10 +2368,10 @@
       function generateConfigCode() {
         const storeName = document.getElementById('settingStoreName')?.value || 'Memory Rehab Lab';
         const storeTagline = document.getElementById('settingStoreTagline')?.value || 'Botanical Skincare';
-        const announcement = document.getElementById('settingAnnouncement')?.value || 'Free Express Shipping On Orders ₦60,000+ • 100% Clean Biocompatible Actives';
+        const announcement = document.getElementById('settingAnnouncement')?.value || 'Free Express Shipping On Orders ₦70,000+ • 100% Clean Biocompatible Actives';
         const promoCode = document.getElementById('settingPromoCode')?.value || 'GLOW15';
         const promoDiscount = parseInt(document.getElementById('settingDiscountPercent')?.value, 10) || 15;
-        const freeShippingThreshold = parseFloat(document.getElementById('settingShippingThreshold')?.value) || 60000;
+        const freeShippingThreshold = parseFloat(document.getElementById('settingShippingThreshold')?.value) || 70000;
         const heroEyebrow = document.getElementById('settingHeroEyebrow')?.value || 'Step-by-Step Clinical Care';
         const heroHeadline = document.getElementById('settingHeroHeadline')?.value || 'Healthy skin starts with a rehabilitated barrier.';
         const heroDescription = document.getElementById('settingHeroDescription')?.value || 'No complicated million-step routines. Memory Rehab simplifies barrier repair into a targeted 3-product routine designed to soothe inflammation, replenish and lock in hydration, and support the repair of your skin barrier.';

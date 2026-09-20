@@ -1240,8 +1240,21 @@ document.addEventListener('DOMContentLoaded', () => {
   let activeShippingCost = 0;
   let activeTotalCost = 0;
 
+  function getFreeShippingThreshold() {
+    try {
+      const raw = localStorage.getItem('mr_store_settings');
+      if (raw) {
+        const s = JSON.parse(raw);
+        if (s && s.freeShippingThreshold && !isNaN(s.freeShippingThreshold) && Number(s.freeShippingThreshold) > 0) {
+          return Number(s.freeShippingThreshold);
+        }
+      }
+    } catch(e) {}
+    return (window.STORE_CONFIG && window.STORE_CONFIG.freeShippingThreshold) || 70000.0;
+  }
+
   function calculateShippingFallback(subtotal, countryCode) {
-    const freeThreshold = (window.STORE_CONFIG && window.STORE_CONFIG.freeShippingThreshold) || 60000.0;
+    const freeThreshold = getFreeShippingThreshold();
     if (subtotal >= freeThreshold) return 0;
     const country = (countryCode || 'NG').toUpperCase();
     if (country === 'NG') return 3500.0;
@@ -1252,7 +1265,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function refreshCheckoutSummary() {
     const subtotal = cart.reduce((s, it) => s + Number(it.price) * it.quantity, 0);
     const country = (checkoutCountry && checkoutCountry.value) || 'NG';
-    const freeThreshold = (window.STORE_CONFIG && window.STORE_CONFIG.freeShippingThreshold) || 60000.0;
+    const freeThreshold = getFreeShippingThreshold();
 
     if (checkoutSubtotal) checkoutSubtotal.textContent = formatCurrency(subtotal);
     if (checkoutShippingCost) checkoutShippingCost.textContent = '…';
@@ -1325,7 +1338,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // See the global function declaration near the top of this file.
 
   function updateShippingProgress(total) {
-    const freeShippingGoal = (window.STORE_CONFIG && window.STORE_CONFIG.freeShippingThreshold) || 60000.0;
+    const freeShippingGoal = getFreeShippingThreshold();
     if (!shippingGoalText || !shippingGoalPercent || !shippingProgressFill) return;
 
     if (total >= freeShippingGoal) {
@@ -1497,6 +1510,107 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // --- GAMIFIED ROUTINE ACHIEVEMENT STREAK & LEVEL ENGINE ---
+  function calculateOrderAchievement(newOrderItems, orderTotal) {
+    let currentStreak = 0;
+    let purchasedProductIds = new Set();
+    try {
+      currentStreak = parseInt(localStorage.getItem('mr_order_streak') || '0', 10);
+      const savedIds = JSON.parse(localStorage.getItem('mr_purchased_product_ids') || '[]');
+      savedIds.forEach(id => purchasedProductIds.add(String(id)));
+    } catch(e) {}
+
+    // Increment streak on new successful order
+    currentStreak += 1;
+    localStorage.setItem('mr_order_streak', String(currentStreak));
+    localStorage.setItem('mr_streak_last_date', new Date().toISOString());
+
+    const currentItemCount = (newOrderItems || []).reduce((sum, item) => sum + (item.quantity || 1), 0);
+    const currentDistinctCount = (newOrderItems || []).length;
+    (newOrderItems || []).forEach(item => {
+      if (item && item.id) purchasedProductIds.add(String(item.id));
+    });
+    localStorage.setItem('mr_purchased_product_ids', JSON.stringify(Array.from(purchasedProductIds)));
+    const totalDistinctEver = purchasedProductIds.size;
+    const totalProductsCount = Math.max(currentItemCount, totalDistinctEver);
+
+    // Levels based on products bought & routine completeness
+    let level = 1;
+    let levelName = 'Apothecary Initiate';
+    let levelIcon = '🌿';
+    let nextLevelText = 'Add a 2nd product to unlock Level 2';
+    let progressPercent = 25;
+    let perkText = '15% Welcome Refill Privileges Unlocked';
+
+    if (totalProductsCount >= 5 || currentStreak >= 4) {
+      level = 5;
+      levelName = 'Barrier Mastery Sovereign';
+      levelIcon = '👑';
+      nextLevelText = 'MAX LEVEL • Radiance Sovereign';
+      progressPercent = 100;
+      perkText = 'Permanent VIP Concierge + Custom Compounding Lab Access';
+    } else if (totalProductsCount >= 4 || currentStreak >= 3) {
+      level = 4;
+      levelName = 'Clinical Luminary';
+      levelIcon = '✨';
+      nextLevelText = 'Next: Level 5 at 5+ products or 4-order streak';
+      progressPercent = 80;
+      perkText = 'Complimentary Apothecary Travel Minis on next dispatch';
+    } else if (totalProductsCount >= 3 || currentDistinctCount >= 3) {
+      level = 3;
+      levelName = 'Routine Alchemist';
+      levelIcon = '🌟';
+      nextLevelText = 'Next: Level 4 at 4 routine formulas';
+      progressPercent = 60;
+      perkText = 'Complete 3-Step Master • Priority Lab Packaging';
+    } else if (totalProductsCount >= 2 || currentDistinctCount >= 2) {
+      level = 2;
+      levelName = 'Barrier Restorer';
+      levelIcon = '💧';
+      nextLevelText = 'Next: Level 3 (Unlock Complete 3-Step Routine)';
+      progressPercent = 40;
+      perkText = 'Dual-Action Defense • 5% Bonus Routine Points';
+    } else {
+      level = 1;
+      levelName = 'Apothecary Initiate';
+      levelIcon = '🌿';
+      nextLevelText = 'Next: Level 2 at 2 routine steps';
+      progressPercent = 25;
+      perkText = '15% Welcome Refill Privileges Unlocked';
+    }
+
+    const unlockedBadges = [];
+    unlockedBadges.push({ icon: '💧', label: 'First Drop' });
+    if (totalProductsCount >= 2) unlockedBadges.push({ icon: '🛡️', label: 'Dual Defender' });
+    if (totalProductsCount >= 3) unlockedBadges.push({ icon: '🌿', label: 'Trinity Master' });
+    if (orderTotal >= getFreeShippingThreshold()) unlockedBadges.push({ icon: '🚚', label: 'VIP Express Courier' });
+    if (currentStreak >= 2) unlockedBadges.push({ icon: '🔥', label: `${currentStreak}-Streak Master` });
+
+    // Sync to user profile in localStorage
+    try {
+      const userRaw = localStorage.getItem('mr_current_user');
+      if (userRaw) {
+        const user = JSON.parse(userRaw);
+        user.level = level;
+        user.levelName = levelName;
+        user.streak = currentStreak;
+        user.badges = unlockedBadges;
+        localStorage.setItem('mr_current_user', JSON.stringify(user));
+      }
+    } catch(e) {}
+
+    return {
+      level,
+      levelName,
+      levelIcon,
+      streak: currentStreak,
+      progressPercent,
+      nextLevelText,
+      perkText,
+      badges: unlockedBadges
+    };
+  }
+
   // --- ORDER PLACEMENT & LAB CELEBRATION ENGINE ---
   function completeOrderFlow({ customerName, customerPhone, email, address, country, method = 'whatsapp' } = {}) {
     if (!cart || cart.length === 0) {
@@ -1515,6 +1629,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const dest = country || (document.getElementById('checkoutCountry')?.value) || 'Nigeria';
     const em = email || (document.getElementById('checkoutEmail')?.value.trim()) || '';
 
+    // Calculate Achievement & Routine Streak based on products purchased
+    const achievement = calculateOrderAchievement(cart, total);
+    const freeThreshold = getFreeShippingThreshold();
+
     // Build rich formatted WhatsApp order text
     let waText = `🌿 *MEMORY REHAB LAB — OFFICIAL ORDER #${orderId}* 🌿%0A`;
     waText += `📅 Date: ${orderDate}%0A`;
@@ -1525,8 +1643,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     waText += `-----------------------------------%0A`;
     waText += `📦 *Subtotal:* ${formatCurrency(subtotal)}%0A`;
-    waText += `🚚 *Shipping:* ${shipping === 0 ? 'FREE EXPRESS (₦60,000+ Unlocked)' : formatCurrency(shipping)}%0A`;
+    waText += `🚚 *Shipping:* ${shipping === 0 ? `FREE EXPRESS (${formatCurrency(freeThreshold)}+ Unlocked)` : formatCurrency(shipping)}%0A`;
     waText += `💰 *TOTAL DUE:* ${formatCurrency(total)}%0A`;
+    waText += `🏆 *Routine Rank:* ${achievement.levelIcon} ${achievement.levelName} (Streak: ${achievement.streak})%0A`;
     waText += `-----------------------------------%0A`;
     waText += `📍 *DELIVERY DETAILS:*%0A`;
     waText += `• Client: ${name}%0A`;
@@ -1547,6 +1666,11 @@ document.addEventListener('DOMContentLoaded', () => {
         shipping,
         total,
         customer: { name, phone, address: addr, country: dest, email: em },
+        achievement: {
+          level: achievement.level,
+          levelName: achievement.levelName,
+          streak: achievement.streak
+        },
         status: 'Order Received — Dispatch In Preparation'
       };
       const existingOrders = JSON.parse(localStorage.getItem('mr_order_history') || '[]');
@@ -1554,9 +1678,15 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('mr_order_history', JSON.stringify(existingOrders));
     } catch(e) {}
 
-    // 1. TRIGGER MASSIVE CELEBRATION CONFETTI
+    // 1. TRIGGER MULTI-WAVE CELEBRATION CONFETTI
     if (typeof window.triggerConfetti === 'function') {
       window.triggerConfetti({ heavy: true });
+      setTimeout(() => {
+        if (typeof window.triggerConfetti === 'function') window.triggerConfetti({ heavy: true });
+      }, 300);
+      setTimeout(() => {
+        if (typeof window.triggerConfetti === 'function') window.triggerConfetti({ heavy: true });
+      }, 650);
     }
 
     // 2. Play celebration sound if available
@@ -1566,7 +1696,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch(e) {}
 
-    // 3. Show Order Success Modal
+    // 3. Show Order Success Modal with Achievement Streak & Level
     const successModal = document.getElementById('orderSuccessModal');
     const successIdBadge = document.getElementById('orderSuccessIdBadge');
     const successSummary = document.getElementById('orderSuccessSummaryBox');
@@ -1584,6 +1714,27 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div style="margin-top:8px; padding-top:6px; border-top:1px dashed var(--glass-border); font-size:0.8rem; color:var(--text-muted);">
           📍 Destination: <strong>${addr ? `${addr}, ${dest}` : dest}</strong>
+        </div>
+
+        <!-- GAMIFIED ACHIEVEMENT STREAK & LEVEL CARD -->
+        <div class="achievement-streak-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span class="streak-fire-pill">🔥 <strong>Streak: ${achievement.streak} Order${achievement.streak > 1 ? 's' : ''}</strong></span>
+            <span class="streak-badge-pill">${achievement.levelIcon} ${achievement.levelName}</span>
+          </div>
+          <div class="streak-meter-track">
+            <div class="streak-meter-fill" style="width:${achievement.progressPercent}%;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:var(--text-muted); margin-bottom:8px;">
+            <span>Level ${achievement.level} of 5</span>
+            <span>${achievement.nextLevelText}</span>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px;">
+            ${achievement.badges.map(b => `<span class="unlocked-badge-chip">${b.icon} ${b.label}</span>`).join('')}
+          </div>
+          <div class="streak-perk-box">
+            🎁 <strong>Perk Unlocked:</strong> ${achievement.perkText}
+          </div>
         </div>
       `;
     }
@@ -2171,6 +2322,19 @@ document.addEventListener('DOMContentLoaded', () => {
           // ── Sync Maintenance Mode ──
           if (typeof initMaintenanceMode === 'function') {
             initMaintenanceMode(settings);
+          }
+          // ── Sync Free Shipping Threshold live from Firestore ──
+          if (settings.freeShippingThreshold && !isNaN(settings.freeShippingThreshold) && Number(settings.freeShippingThreshold) > 0) {
+            try {
+              const existing = JSON.parse(localStorage.getItem('mr_store_settings') || '{}');
+              existing.freeShippingThreshold = Number(settings.freeShippingThreshold);
+              localStorage.setItem('mr_store_settings', JSON.stringify(existing));
+              // Refresh shipping progress bar if cart is open
+              if (typeof updateShippingProgress === 'function') {
+                const cartSubtotal = cart ? cart.reduce((s, it) => s + Number(it.price) * it.quantity, 0) : 0;
+                updateShippingProgress(cartSubtotal);
+              }
+            } catch(e) {}
           }
         }
       }, (err) => console.warn('Store settings sync:', err.message));

@@ -245,6 +245,62 @@
             Create Account & Get 15% Off
           </button>
         </form>
+
+
+    <!-- ACCOUNT DASHBOARD (shown when already logged in) -->
+    <div class="auth-page-shell" id="accountDashboard" style="display:none; margin-top: 0; padding-top: 0;">
+      <div class="auth-glass-container" style="max-width: 480px; width: 100%;">
+        <div class="auth-header" style="margin-bottom: 6px;">
+          <div class="auth-brand-mark" id="dashUserInitial">MR</div>
+          <h1 class="auth-title" id="dashUserName">My Account</h1>
+          <p class="auth-subtitle" id="dashUserEmail">–</p>
+        </div>
+
+        <!-- Achievement Streak & Level Card -->
+        <div id="dashAchievementCard" class="achievement-streak-card" style="margin-bottom:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span class="streak-fire-pill" id="dashStreakPill">🔥 <strong>Streak: 0 Orders</strong></span>
+            <span class="streak-badge-pill" id="dashLevelBadge">🌿 Apothecary Initiate</span>
+          </div>
+          <div class="streak-meter-track">
+            <div class="streak-meter-fill" id="dashProgressBar" style="width:25%;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:var(--text-muted); margin-bottom:8px;">
+            <span id="dashLevelText">Level 1 of 5</span>
+            <span id="dashNextLevel">Add a 2nd product to unlock Level 2</span>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px;" id="dashBadges"></div>
+          <div class="streak-perk-box" id="dashPerk">🎁 <strong>Perk Unlocked:</strong> 15% Welcome Refill Privileges</div>
+        </div>
+
+        <!-- Quick Stats Row -->
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:14px;" id="dashStats">
+          <div style="background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:10px; padding:10px; text-align:center;">
+            <div style="font-size:1.4rem; font-weight:800; color:var(--primary);" id="dashOrderCount">0</div>
+            <div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Orders</div>
+          </div>
+          <div style="background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:10px; padding:10px; text-align:center;">
+            <div style="font-size:1.4rem; font-weight:800; color:var(--primary);" id="dashStreakCount">0</div>
+            <div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Streak</div>
+          </div>
+          <div style="background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:10px; padding:10px; text-align:center;">
+            <div style="font-size:1.4rem; font-weight:800; color:var(--primary);" id="dashBadgeCount">0</div>
+            <div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Badges</div>
+          </div>
+        </div>
+
+        <!-- Recent Orders (last 3) -->
+        <div id="dashRecentOrdersWrap" style="margin-bottom:14px; display:none;">
+          <h3 style="font-size:0.82rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">Recent Orders</h3>
+          <div id="dashRecentOrders"></div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <a href="index.html" class="btn-primary" style="flex:1; text-align:center; min-width:120px;">🛍️ Shop Store</a>
+          <a href="wishlist.html" class="btn-secondary" style="flex:1; text-align:center; min-width:120px;">💜 My Wishlist</a>
+        </div>
+        <button type="button" id="dashSignOutBtn" style="width:100%; margin-top:10px; background:transparent; border:1px solid var(--glass-border); border-radius:8px; padding:10px; color:var(--text-muted); font-size:0.82rem; cursor:pointer;">Sign Out</button>
       </div>
     </div>
 
@@ -492,6 +548,101 @@
           }
         }
       });
+
+      // ─── 5. ACCOUNT DASHBOARD (shown if already logged in) ───
+      function renderAccountDashboard() {
+        try {
+          const raw = localStorage.getItem('mr_current_user');
+          if (!raw) return;
+          const user = JSON.parse(raw);
+          if (!user || !user.email) return;
+
+          // Show dashboard, hide auth form shell
+          const authShell = document.querySelector('.auth-page-shell:not(#accountDashboard)');
+          if (authShell) authShell.style.display = 'none';
+          const dashboard = document.getElementById('accountDashboard');
+          if (dashboard) dashboard.style.display = '';
+
+          // Fill name/email/initial
+          const initials = (user.name || 'MR').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+          const el = (id) => document.getElementById(id);
+          if (el('dashUserInitial')) el('dashUserInitial').textContent = initials;
+          if (el('dashUserName')) el('dashUserName').textContent = user.name || 'My Account';
+          if (el('dashUserEmail')) el('dashUserEmail').textContent = user.email + (user.skinType ? ` · ${user.skinType}` : '');
+
+          // Achievement data (populated by completeOrderFlow in script.js)
+          const level = user.level || 1;
+          const levelName = user.levelName || 'Apothecary Initiate';
+          const streak = user.streak || 0;
+          const badges = Array.isArray(user.badges) ? user.badges : [];
+
+          const levelProgressMap = { 1: 25, 2: 40, 3: 60, 4: 80, 5: 100 };
+          const levelNextMap = {
+            1: 'Next: Level 2 — add a 2nd product',
+            2: 'Next: Level 3 — complete 3-step routine',
+            3: 'Next: Level 4 — 4 routine formulas',
+            4: 'Next: Level 5 — 5+ products or 4-order streak',
+            5: 'MAX LEVEL · Radiance Sovereign 👑'
+          };
+          const levelPerkMap = {
+            1: '15% Welcome Refill Privileges Unlocked',
+            2: 'Dual-Action Defense · 5% Bonus Routine Points',
+            3: 'Complete 3-Step Master · Priority Lab Packaging',
+            4: 'Complimentary Apothecary Travel Minis on next dispatch',
+            5: 'Permanent VIP Concierge + Custom Compounding Lab Access'
+          };
+          const levelIconMap = { 1: '🌿', 2: '💧', 3: '🌟', 4: '✨', 5: '👑' };
+
+          if (el('dashStreakPill')) el('dashStreakPill').innerHTML = `🔥 <strong>Streak: ${streak} Order${streak !== 1 ? 's' : ''}</strong>`;
+          if (el('dashLevelBadge')) el('dashLevelBadge').textContent = `${levelIconMap[level] || '🌿'} ${levelName}`;
+          if (el('dashProgressBar')) el('dashProgressBar').style.width = `${levelProgressMap[level] || 25}%`;
+          if (el('dashLevelText')) el('dashLevelText').textContent = `Level ${level} of 5`;
+          if (el('dashNextLevel')) el('dashNextLevel').textContent = levelNextMap[level] || '';
+          if (el('dashPerk')) el('dashPerk').innerHTML = `🎁 <strong>Perk Unlocked:</strong> ${levelPerkMap[level] || ''}`;
+
+          // Badges
+          const badgesEl = el('dashBadges');
+          if (badgesEl) {
+            badgesEl.innerHTML = badges.length > 0
+              ? badges.map(b => `<span class="unlocked-badge-chip">${b.icon} ${b.label}</span>`).join('')
+              : '<span style="font-size:0.78rem; color:var(--text-muted);">Place your first order to unlock badges 🎯</span>';
+          }
+
+          // Order history stats
+          const orders = JSON.parse(localStorage.getItem('mr_order_history') || '[]');
+          if (el('dashOrderCount')) el('dashOrderCount').textContent = orders.length;
+          if (el('dashStreakCount')) el('dashStreakCount').textContent = streak;
+          if (el('dashBadgeCount')) el('dashBadgeCount').textContent = badges.length;
+
+          // Recent orders (last 3)
+          const recentWrap = el('dashRecentOrdersWrap');
+          const recentEl = el('dashRecentOrders');
+          if (recentWrap && recentEl && orders.length > 0) {
+            recentWrap.style.display = '';
+            const recent = orders.slice(-3).reverse();
+            recentEl.innerHTML = recent.map(o => `
+              <div style="background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:10px; padding:10px 12px; margin-bottom:6px; font-size:0.82rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                  <strong style="color:var(--primary);">Order #${o.orderId || '—'}</strong>
+                  <span style="color:var(--success); font-weight:700;">${typeof o.total === 'number' ? '₦' + o.total.toLocaleString() : (o.total || '—')}</span>
+                </div>
+                <div style="color:var(--text-muted);">${o.customer?.name || ''} · ${o.date || ''}</div>
+                <div style="margin-top:3px; color:var(--text-muted); font-size:0.75rem;">📦 ${o.status || 'Order Received'}</div>
+              </div>`).join('');
+          }
+
+        } catch(e) { console.warn('Dashboard render error:', e); }
+      }
+
+      // Sign-out button
+      document.getElementById('dashSignOutBtn')?.addEventListener('click', () => {
+        localStorage.removeItem('mr_current_user');
+        try { auth.signOut(); } catch(e) {}
+        window.location.reload();
+      });
+
+      // Run on load
+      renderAccountDashboard();
     </script>
 
     <!-- Free Shipping Milestone Confetti Canvas -->
