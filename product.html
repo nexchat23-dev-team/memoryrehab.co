@@ -704,6 +704,9 @@
           firebase.initializeApp(firebaseConfig);
         }
         db = firebase.firestore();
+        try {
+          db.settings({ experimentalForceLongPolling: true, merge: true });
+        } catch(e) {}
         firebaseReady = true;
       } catch (err) {
         console.warn('[Memory Rehab] Firebase initialization:', err.message);

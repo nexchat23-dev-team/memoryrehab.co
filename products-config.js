@@ -19,6 +19,7 @@ const STORE_CONFIG = {
   storeTagline: 'Botanical Skincare',
   brandMonogram: 'MR',
   footerBio: 'High-performance botanical formulas dedicated to skin barrier recovery, soothing balance, and healthy everyday radiance.',
+  footerYear: '2026',
   footerCopyright: '© 2026 Memory Rehab Lab. All rights reserved.',
   footerTagline: 'Crafted with botanical purity & clinical precision.',
   promoCode: 'GLOW15',

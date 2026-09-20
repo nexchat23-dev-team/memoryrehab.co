@@ -75,8 +75,16 @@
   ],
   "routes": [
     {
+      "src": "/api/admin/login",
+      "dest": "/api/admin/login.js"
+    },
+    {
+      "src": "/api/upload",
+      "dest": "/api/upload.js"
+    },
+    {
       "src": "/api/(.*)",
-      "dest": "/api/index.js"
+      "dest": "/api/[...all].js"
     },
     {
       "src": "/css/(.*)",

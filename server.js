@@ -2,6 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+const { put } = require('@vercel/blob');
 require('dotenv').config();
 
 const PORT = Number(process.env.PORT) || 3000;
@@ -304,6 +305,35 @@ async function handleRequest(req, res) {
   const pathname = decodeURIComponent(parsedUrl.pathname);
 
   // ── REST API ROUTES ──
+  if (pathname === '/api/upload' && req.method === 'POST') {
+    try {
+      const rawFilename = (parsedUrl.query && parsedUrl.query.filename) || req.headers['x-filename'] || 'upload.jpg';
+      const cleanFilename = `products/${Date.now()}_${path.basename(rawFilename).replace(/\s+/g, '_')}`;
+
+      const chunks = [];
+      for await (const chunk of req) {
+        chunks.push(chunk);
+      }
+      const buffer = Buffer.concat(chunks);
+
+      if (!buffer || buffer.length === 0) {
+        return sendJson(res, 400, { error: 'Empty file body' });
+      }
+
+      const contentType = req.headers['content-type'] || 'image/jpeg';
+      const blob = await put(cleanFilename, buffer, {
+        access: 'public',
+        contentType: contentType,
+        token: process.env.BLOB_READ_WRITE_TOKEN
+      });
+
+      return sendJson(res, 200, { ok: true, url: blob.url });
+    } catch (err) {
+      console.error('Blob upload error:', err);
+      return sendJson(res, 500, { error: err.message });
+    }
+  }
+
   if (pathname === '/api/health' && req.method === 'GET') {
     return sendJson(res, 200, { ok: true, service: 'memory-rehab-backend', timestamp: new Date().toISOString() });
   }

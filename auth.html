@@ -106,7 +106,7 @@
     </header>
 
     <!-- Main Auth Center Container -->
-    <div class="auth-page-shell">
+    <div class="auth-page-shell" id="authFormsShell">
       <div class="auth-glass-container">
         <div class="auth-header">
           <div class="auth-brand-mark">MR</div>
@@ -245,62 +245,106 @@
             Create Account & Get 15% Off
           </button>
         </form>
+      </div>
+    </div>
 
-
-    <!-- ACCOUNT DASHBOARD (shown when already logged in) -->
+    <!-- ADVANCED ACCOUNT SANCTUARY & CLINICAL PROTOCOL DASHBOARD (shown when already logged in) -->
     <div class="auth-page-shell" id="accountDashboard" style="display:none; margin-top: 0; padding-top: 0;">
-      <div class="auth-glass-container" style="max-width: 480px; width: 100%;">
-        <div class="auth-header" style="margin-bottom: 6px;">
+      <div class="auth-glass-container" style="max-width: 490px; width: 100%;">
+        <div class="auth-header" style="margin-bottom: 12px;">
           <div class="auth-brand-mark" id="dashUserInitial">MR</div>
-          <h1 class="auth-title" id="dashUserName">My Account</h1>
+          <h1 class="auth-title" id="dashUserName">Client Account</h1>
           <p class="auth-subtitle" id="dashUserEmail">–</p>
         </div>
 
-        <!-- Achievement Streak & Level Card -->
+        <!-- Advanced Clinical Achievement & Protocol Card -->
         <div id="dashAchievementCard" class="achievement-streak-card" style="margin-bottom:14px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <span class="streak-fire-pill" id="dashStreakPill">🔥 <strong>Streak: 0 Orders</strong></span>
-            <span class="streak-badge-pill" id="dashLevelBadge">🌿 Apothecary Initiate</span>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span class="streak-fire-pill" id="dashStreakPill">
+              <svg class="badge-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+              <strong>STREAK: 0 ORDERS</strong>
+            </span>
+            <span class="streak-badge-pill" id="dashLevelBadge">TIER I • APOTHECARY INITIATE</span>
           </div>
+
           <div class="streak-meter-track">
             <div class="streak-meter-fill" id="dashProgressBar" style="width:25%;"></div>
           </div>
+
           <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:var(--text-muted); margin-bottom:8px;">
-            <span id="dashLevelText">Level 1 of 5</span>
-            <span id="dashNextLevel">Add a 2nd product to unlock Level 2</span>
+            <span id="dashLevelText">TIER 1 OF 5</span>
+            <span id="dashNextLevel">Acquire a 2nd formulation to advance to Tier II</span>
           </div>
-          <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px;" id="dashBadges"></div>
-          <div class="streak-perk-box" id="dashPerk">🎁 <strong>Perk Unlocked:</strong> 15% Welcome Refill Privileges</div>
+
+          <!-- Routine Tenure Breakdown (Years, Months, Weeks, Days) -->
+          <div class="streak-tenure-row">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="streak-tenure-pill">
+                <svg class="badge-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>ROUTINE TENURE</span>
+              </span>
+              <strong style="color:var(--text-main); font-size:0.78rem;" id="dashTenureText">Day 1 • Protocol Commenced</strong>
+            </div>
+            <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em;" id="dashTenureSince">Active Client</span>
+          </div>
+
+          <!-- 4-Column Tenure Metric Grid -->
+          <div class="tenure-grid-mini">
+            <div class="tenure-grid-col">
+              <div class="tenure-grid-val" id="dashTenureYears">0</div>
+              <div class="tenure-grid-lbl">Years</div>
+            </div>
+            <div class="tenure-grid-col">
+              <div class="tenure-grid-val" id="dashTenureMonths">0</div>
+              <div class="tenure-grid-lbl">Months</div>
+            </div>
+            <div class="tenure-grid-col">
+              <div class="tenure-grid-val" id="dashTenureWeeks">0</div>
+              <div class="tenure-grid-lbl">Weeks</div>
+            </div>
+            <div class="tenure-grid-col">
+              <div class="tenure-grid-val" id="dashTenureDays">0</div>
+              <div class="tenure-grid-lbl">Days</div>
+            </div>
+          </div>
+
+          <!-- Unlocked Clinical Badges -->
+          <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px;" id="dashBadges"></div>
+
+          <!-- Active Protocol Privilege -->
+          <div class="streak-perk-box" id="dashPerk">
+            <strong style="color:var(--primary); text-transform:uppercase; font-size:0.74rem; letter-spacing:0.04em;">ACTIVE PROTOCOL PRIVILEGE:</strong> 15% Welcome Refill Privileges Activated
+          </div>
         </div>
 
-        <!-- Quick Stats Row -->
+        <!-- Clinical Overview Metric Row -->
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:14px;" id="dashStats">
           <div style="background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:10px; padding:10px; text-align:center;">
-            <div style="font-size:1.4rem; font-weight:800; color:var(--primary);" id="dashOrderCount">0</div>
-            <div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Orders</div>
+            <div style="font-size:1.35rem; font-weight:800; color:var(--primary);" id="dashOrderCount">0</div>
+            <div style="font-size:0.68rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Orders</div>
           </div>
           <div style="background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:10px; padding:10px; text-align:center;">
-            <div style="font-size:1.4rem; font-weight:800; color:var(--primary);" id="dashStreakCount">0</div>
-            <div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Streak</div>
+            <div style="font-size:1.35rem; font-weight:800; color:var(--primary);" id="dashStreakCount">0</div>
+            <div style="font-size:0.68rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Streak</div>
           </div>
           <div style="background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:10px; padding:10px; text-align:center;">
-            <div style="font-size:1.4rem; font-weight:800; color:var(--primary);" id="dashBadgeCount">0</div>
-            <div style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Badges</div>
+            <div style="font-size:1.35rem; font-weight:800; color:var(--primary);" id="dashBadgeCount">0</div>
+            <div style="font-size:0.68rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Badges</div>
           </div>
         </div>
 
-        <!-- Recent Orders (last 3) -->
+        <!-- Recent Clinical Dispatches (last 3) -->
         <div id="dashRecentOrdersWrap" style="margin-bottom:14px; display:none;">
-          <h3 style="font-size:0.82rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">Recent Orders</h3>
+          <h3 style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">Recent Clinical Dispatches</h3>
           <div id="dashRecentOrders"></div>
         </div>
 
-        <!-- Actions -->
+        <!-- Navigation Actions -->
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <a href="index.html" class="btn-primary" style="flex:1; text-align:center; min-width:120px;">🛍️ Shop Store</a>
-          <a href="wishlist.html" class="btn-secondary" style="flex:1; text-align:center; min-width:120px;">💜 My Wishlist</a>
+          <a href="index.html" class="btn-primary" style="flex:1; text-align:center; min-width:120px; font-size:0.85rem;">Shop Storefront</a>
+          <a href="wishlist.html" class="btn-secondary" style="flex:1; text-align:center; min-width:120px; font-size:0.85rem;">Routine Wishlist</a>
         </div>
-        <button type="button" id="dashSignOutBtn" style="width:100%; margin-top:10px; background:transparent; border:1px solid var(--glass-border); border-radius:8px; padding:10px; color:var(--text-muted); font-size:0.82rem; cursor:pointer;">Sign Out</button>
+        <button type="button" id="dashSignOutBtn" style="width:100%; margin-top:10px; background:transparent; border:1px solid var(--glass-border); border-radius:8px; padding:9px; color:var(--text-muted); font-size:0.8rem; font-weight:600; cursor:pointer; text-transform:uppercase; letter-spacing:0.05em;">Sign Out</button>
       </div>
     </div>
 
@@ -577,35 +621,70 @@
           const badges = Array.isArray(user.badges) ? user.badges : [];
 
           const levelProgressMap = { 1: 25, 2: 40, 3: 60, 4: 80, 5: 100 };
+          const levelTierMap = { 1: 'TIER I', 2: 'TIER II', 3: 'TIER III', 4: 'TIER IV', 5: 'TIER V' };
           const levelNextMap = {
-            1: 'Next: Level 2 — add a 2nd product',
-            2: 'Next: Level 3 — complete 3-step routine',
-            3: 'Next: Level 4 — 4 routine formulas',
-            4: 'Next: Level 5 — 5+ products or 4-order streak',
-            5: 'MAX LEVEL · Radiance Sovereign 👑'
+            1: 'Acquire a 2nd formulation to advance to Tier II',
+            2: 'Advance to Tier III with Complete 3-Step Routine',
+            3: 'Next: Tier IV at 4 active routine formulations',
+            4: 'Next: Tier V at 5+ formulations or 4-order streak',
+            5: 'MAXIMUM TIER • Clinical Barrier Sovereign'
           };
           const levelPerkMap = {
-            1: '15% Welcome Refill Privileges Unlocked',
-            2: 'Dual-Action Defense · 5% Bonus Routine Points',
-            3: 'Complete 3-Step Master · Priority Lab Packaging',
-            4: 'Complimentary Apothecary Travel Minis on next dispatch',
-            5: 'Permanent VIP Concierge + Custom Compounding Lab Access'
+            1: '15% Welcome Refill Privileges Activated',
+            2: 'Dual-Action Lipid Defense & 5% Bonus Routine Allocation',
+            3: 'Complete 3-Step Mastery & Priority Lab Batch Dispatch',
+            4: 'Complimentary Apothecary Travel Units on next dispatch',
+            5: 'Permanent VIP Lab Concierge & Bespoke Batch Compounding Access'
           };
-          const levelIconMap = { 1: '🌿', 2: '💧', 3: '🌟', 4: '✨', 5: '👑' };
 
-          if (el('dashStreakPill')) el('dashStreakPill').innerHTML = `🔥 <strong>Streak: ${streak} Order${streak !== 1 ? 's' : ''}</strong>`;
-          if (el('dashLevelBadge')) el('dashLevelBadge').textContent = `${levelIconMap[level] || '🌿'} ${levelName}`;
+          const flameSvg = '<svg class="badge-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>';
+          const checkSvg = '<svg class="badge-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+
+          if (el('dashStreakPill')) el('dashStreakPill').innerHTML = `${flameSvg} <strong>STREAK: ${streak} ORDER${streak !== 1 ? 'S' : ''}</strong>`;
+          if (el('dashLevelBadge')) el('dashLevelBadge').textContent = `${levelTierMap[level] || 'TIER I'} • ${levelName.toUpperCase()}`;
           if (el('dashProgressBar')) el('dashProgressBar').style.width = `${levelProgressMap[level] || 25}%`;
-          if (el('dashLevelText')) el('dashLevelText').textContent = `Level ${level} of 5`;
+          if (el('dashLevelText')) el('dashLevelText').textContent = `TIER ${level} OF 5`;
           if (el('dashNextLevel')) el('dashNextLevel').textContent = levelNextMap[level] || '';
-          if (el('dashPerk')) el('dashPerk').innerHTML = `🎁 <strong>Perk Unlocked:</strong> ${levelPerkMap[level] || ''}`;
+          if (el('dashPerk')) el('dashPerk').innerHTML = `<strong style="color:var(--primary); text-transform:uppercase; font-size:0.74rem; letter-spacing:0.04em;">ACTIVE PROTOCOL PRIVILEGE:</strong> ${levelPerkMap[level] || ''}`;
 
-          // Badges
+          // High-speed tenure calculation (Years, Months, Weeks, Days)
+          let tenure = user.tenure;
+          if (!tenure && typeof window.getRoutineTenureData === 'function') {
+            tenure = window.getRoutineTenureData();
+          } else if (!tenure) {
+            let start = user.createdAt ? new Date(user.createdAt) : new Date();
+            const now = new Date();
+            const diffDays = Math.floor(Math.max(0, now - start) / 86400000);
+            let y = now.getFullYear() - start.getFullYear();
+            let m = now.getMonth() - start.getMonth();
+            let d = now.getDate() - start.getDate();
+            if (d < 0) { m--; d += 30; }
+            if (m < 0) { y--; m += 12; }
+            if (y < 0) y = 0;
+            const w = Math.floor(d / 7);
+            const remD = d % 7;
+            const parts = [];
+            if (y > 0) parts.push(`${y} yr${y > 1 ? 's' : ''}`);
+            if (m > 0) parts.push(`${m} mo${m > 1 ? 's' : ''}`);
+            if (w > 0) parts.push(`${w} wk${w > 1 ? 's' : ''}`);
+            if (remD > 0 || parts.length === 0) parts.push(`${remD} day${remD !== 1 ? 's' : ''}`);
+            tenure = { years: y, months: m, weeks: w, days: remD, totalDays: diffDays, formattedText: parts.join(', ') };
+          }
+
+          if (tenure) {
+            if (el('dashTenureText')) el('dashTenureText').textContent = tenure.formattedText || 'Day 1 • Protocol Commenced';
+            if (el('dashTenureYears')) el('dashTenureYears').textContent = tenure.years || 0;
+            if (el('dashTenureMonths')) el('dashTenureMonths').textContent = tenure.months || 0;
+            if (el('dashTenureWeeks')) el('dashTenureWeeks').textContent = tenure.weeks || 0;
+            if (el('dashTenureDays')) el('dashTenureDays').textContent = tenure.days !== undefined ? tenure.days : (tenure.totalDays || 0);
+          }
+
+          // Badges with SVG icons and zero emojis
           const badgesEl = el('dashBadges');
           if (badgesEl) {
             badgesEl.innerHTML = badges.length > 0
-              ? badges.map(b => `<span class="unlocked-badge-chip">${b.icon} ${b.label}</span>`).join('')
-              : '<span style="font-size:0.78rem; color:var(--text-muted);">Place your first order to unlock badges 🎯</span>';
+              ? badges.map(b => `<span class="unlocked-badge-chip">${b.iconSvg || checkSvg} ${b.label}</span>`).join('')
+              : '<span style="font-size:0.75rem; color:var(--text-muted); letter-spacing:0.02em;">Complete first clinical order to activate badges</span>';
           }
 
           // Order history stats
@@ -623,11 +702,11 @@
             recentEl.innerHTML = recent.map(o => `
               <div style="background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:10px; padding:10px 12px; margin-bottom:6px; font-size:0.82rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                  <strong style="color:var(--primary);">Order #${o.orderId || '—'}</strong>
+                  <strong style="color:var(--primary); font-family:monospace; letter-spacing:0.04em;">ORDER #${o.id || o.orderId || '—'}</strong>
                   <span style="color:var(--success); font-weight:700;">${typeof o.total === 'number' ? '₦' + o.total.toLocaleString() : (o.total || '—')}</span>
                 </div>
-                <div style="color:var(--text-muted);">${o.customer?.name || ''} · ${o.date || ''}</div>
-                <div style="margin-top:3px; color:var(--text-muted); font-size:0.75rem;">📦 ${o.status || 'Order Received'}</div>
+                <div style="color:var(--text-muted); font-size:0.75rem;">${o.customer?.name || ''} · ${o.date || ''}</div>
+                <div style="margin-top:3px; color:var(--text-muted); font-size:0.74rem; font-weight:600; letter-spacing:0.02em;">STATUS: ${o.status || 'Order Received — Dispatch In Preparation'}</div>
               </div>`).join('');
           }
 

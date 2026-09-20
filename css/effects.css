@@ -705,6 +705,77 @@
   line-height: 1.4;
 }
 
+.streak-tenure-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.16), rgba(168, 85, 247, 0.2));
+  border: 1px solid rgba(168, 85, 247, 0.38);
+  color: #c084fc;
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  letter-spacing: 0.02em;
+}
+
+.streak-tenure-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: 10px;
+  font-size: 0.78rem;
+}
+
+.tenure-grid-mini {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 10px 0 6px 0;
+  text-align: center;
+}
+
+.tenure-grid-col {
+  background: var(--glass-bg, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12));
+  border-radius: 10px;
+  padding: 7px 4px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.tenure-grid-col:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary, #10b981);
+}
+
+.tenure-grid-val {
+  font-size: 1.18rem;
+  font-weight: 900;
+  color: var(--primary, #10b981);
+  line-height: 1.1;
+  font-family: inherit;
+}
+
+.tenure-grid-lbl {
+  font-size: 0.63rem;
+  color: var(--text-muted, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 800;
+  margin-top: 3px;
+}
+
+/* Fast loading instant toggle for auth dashboard */
+.has-logged-in-user #authFormsShell { display: none !important; }
+.has-logged-in-user #accountDashboard { display: flex !important; }
+
+
 /* 8. HERO APOTHECARY QUIZ CTA PILL */
 .hero-quiz-trigger-pill {
   display: inline-flex;

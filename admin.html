@@ -349,10 +349,16 @@
               <textarea id="settingFooterBio" class="admin-input" rows="3">High-performance botanical formulas dedicated to skin barrier recovery, soothing balance, and healthy everyday radiance.</textarea>
             </div>
 
+            <div class="admin-field-group">
+              <label class="admin-label" for="settingFooterYear">Copyright Year</label>
+              <input type="text" id="settingFooterYear" class="admin-input" placeholder="e.g. 2026, 2025" style="font-weight: 600;" />
+              <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">Customizable anytime. If left blank, defaults to current year automatically.</p>
+            </div>
+
             <div class="admin-field-group" style="grid-column: 1 / -1;">
-              <label class="admin-label" for="settingFooterCopyright">Copyright Notice</label>
+              <label class="admin-label" for="settingFooterCopyright">Copyright Notice / Organization Name</label>
               <input type="text" id="settingFooterCopyright" class="admin-input" value="Memory Rehab Lab. All rights reserved." />
-              <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">The © symbol and current year are added automatically.</p>
+              <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">The © symbol and year are prepended automatically.</p>
             </div>
 
             <div class="admin-field-group" style="grid-column: 1 / -1;">
@@ -957,6 +963,11 @@
       }
       const auth = (hasFirebase && firebase.auth) ? firebase.auth() : null;
       const db = (hasFirebase && firebase.firestore) ? firebase.firestore() : null;
+      if (db) {
+        try {
+          db.settings({ experimentalForceLongPolling: true, merge: true });
+        } catch(e) {}
+      }
       const storage = (hasFirebase && firebase.storage) ? firebase.storage() : null;
 
       const adminAuthGate = document.getElementById('adminAuthGate');
@@ -1149,6 +1160,7 @@
             if (ls.welcomeImageUrl) document.getElementById('settingWelcomeImageUrl').value = ls.welcomeImageUrl;
             if (ls.brandMonogram) document.getElementById('settingBrandMonogram').value = ls.brandMonogram;
             if (ls.footerBio) document.getElementById('settingFooterBio').value = ls.footerBio;
+            if (ls.footerYear) document.getElementById('settingFooterYear').value = ls.footerYear;
             if (ls.footerCopyright) document.getElementById('settingFooterCopyright').value = ls.footerCopyright;
             if (ls.footerTagline) document.getElementById('settingFooterTagline').value = ls.footerTagline;
             if (ls.whatsappNumber) document.getElementById('settingWhatsApp').value = ls.whatsappNumber;
@@ -1197,6 +1209,7 @@
             if (data.welcomeImageUrl) document.getElementById('settingWelcomeImageUrl').value = data.welcomeImageUrl;
             if (data.brandMonogram) document.getElementById('settingBrandMonogram').value = data.brandMonogram;
             if (data.footerBio) document.getElementById('settingFooterBio').value = data.footerBio;
+            if (data.footerYear) document.getElementById('settingFooterYear').value = data.footerYear;
             if (data.footerCopyright) document.getElementById('settingFooterCopyright').value = data.footerCopyright;
             if (data.footerTagline) document.getElementById('settingFooterTagline').value = data.footerTagline;
             if (data.whatsappNumber) document.getElementById('settingWhatsApp').value = data.whatsappNumber;
@@ -1533,9 +1546,9 @@
           await db.collection('store_settings').doc('general').set(updates, { merge: true });
           if (typeof window.showToast === 'function') {
             if (finalUrl) {
-              window.showToast(targetKey === 'hero' ? 'Hero image uploaded to Firebase Storage!' : 'Welcome image uploaded to Firebase Storage!', '🖼️');
+              window.showToast(targetKey === 'hero' ? 'Hero image uploaded to Vercel Blob!' : 'Welcome image uploaded to Vercel Blob!', '🖼️');
             } else {
-              window.showToast(targetKey === 'hero' ? 'Storage not available on this plan, so the hero image was kept locally.' : 'Storage not available on this plan, so the welcome image was kept locally.', '⚠️');
+              window.showToast(targetKey === 'hero' ? 'Storage upload failed, hero image was kept locally.' : 'Storage upload failed, welcome image was kept locally.', '⚠️');
             }
           }
         } catch (err) {
@@ -1657,17 +1670,42 @@
         }
       });
 
-      async function uploadImageToStorage(file, folderName = 'uploads') {
-        if (!file || !storage) return null;
+      async function uploadImageToStorage(file, folderName = 'products') {
+        if (!file) return null;
 
+        // 1. Try Vercel Blob storage via /api/upload
         try {
-          const storageRef = storage.ref(`${folderName}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`);
-          const snapshot = await storageRef.put(file);
-          return await snapshot.ref.getDownloadURL();
-        } catch (err) {
-          console.warn('Firebase Storage upload failed or is unavailable on this plan:', err.message);
-          return null;
+          const res = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': file.type || 'application/octet-stream',
+              'X-Filename': file.name
+            },
+            body: file
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.url) {
+              console.log('✅ Image uploaded to Vercel Blob:', data.url);
+              return data.url;
+            }
+          }
+        } catch (blobErr) {
+          console.warn('Vercel Blob upload endpoint notice:', blobErr.message);
         }
+
+        // 2. Fallback to Firebase Storage if available
+        if (storage) {
+          try {
+            const storageRef = storage.ref(`${folderName}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`);
+            const snapshot = await storageRef.put(file);
+            return await snapshot.ref.getDownloadURL();
+          } catch (err) {
+            console.warn('Firebase Storage upload failed or is unavailable on this plan:', err.message);
+          }
+        }
+
+        return null;
       }
 
       // Quick Upload Photo from table row
@@ -1693,7 +1731,7 @@
             try {
               await db.collection('products').doc(targetUploadRowId).set({ image: dataUrl }, { merge: true });
               if (typeof window.showToast === 'function') {
-                window.showToast('Product photo updated & saved to cloud!', '📷');
+                window.showToast('Product photo updated & saved!', '📷');
               }
             } catch(err) {
               console.warn('Image save error:', err);
@@ -1714,7 +1752,7 @@
         try {
           await db.collection('products').doc(targetUploadRowId).set({ image: finalUrl }, { merge: true });
           if (typeof window.showToast === 'function') {
-            window.showToast('Product photo uploaded to Firebase Storage!', '📷');
+            window.showToast('Product photo uploaded to Vercel Blob & saved to cloud!', '📷');
           }
         } catch(err) {
           console.warn('Image save error:', err);
@@ -1797,10 +1835,16 @@
         const file = e.target.files[0];
         if (!file) return;
 
+        modalImgPreview.style.opacity = '0.5';
         const uploadedUrl = await uploadImageToStorage(file, 'products');
+        modalImgPreview.style.opacity = '1';
+
         if (uploadedUrl) {
           modalImgPreview.src = uploadedUrl;
           modalImgPreview.style.display = 'block';
+          if (typeof window.showToast === 'function') {
+            window.showToast('Product photo uploaded to Vercel Blob!', '📷');
+          }
         } else {
           const reader = new FileReader();
           reader.onload = function(evt) {
@@ -2186,10 +2230,11 @@
 
         const brandMonogram = (document.getElementById('settingBrandMonogram')?.value || 'MR').toUpperCase().slice(0,4);
         const footerBio = document.getElementById('settingFooterBio')?.value.trim() || 'High-performance botanical formulas dedicated to skin barrier recovery, soothing balance, and healthy everyday radiance.';
+        const footerYear = document.getElementById('settingFooterYear')?.value.trim() || '';
         const footerCopyright = document.getElementById('settingFooterCopyright')?.value.trim() || 'Memory Rehab Lab. All rights reserved.';
         const footerTagline = document.getElementById('settingFooterTagline')?.value.trim() || 'Crafted with botanical purity & clinical precision.';
 
-        const footerData = { brandMonogram, footerBio, footerCopyright, footerTagline };
+        const footerData = { brandMonogram, footerBio, footerYear, footerCopyright, footerTagline };
 
         try {
           const existing = JSON.parse(localStorage.getItem('mr_store_settings') || '{}');
@@ -2382,6 +2427,7 @@
         const welcomeDescription = document.getElementById('settingWelcomeDescription')?.value || 'Welcome to Memory Rehab. Join our skincare collective today to unlock personalized routine recommendations and save on your first clinical care order.';
         const brandMonogram = (document.getElementById('settingBrandMonogram')?.value || 'MR').toUpperCase().slice(0,4);
         const footerBio = document.getElementById('settingFooterBio')?.value.trim() || 'High-performance botanical formulas dedicated to skin barrier recovery, soothing balance, and healthy everyday radiance.';
+        const footerYear = document.getElementById('settingFooterYear')?.value.trim() || '';
         const footerCopyright = document.getElementById('settingFooterCopyright')?.value.trim() || 'Memory Rehab Lab. All rights reserved.';
         const footerTagline = document.getElementById('settingFooterTagline')?.value.trim() || 'Crafted with botanical purity & clinical precision.';
 
@@ -2402,6 +2448,7 @@
           welcomeDescription: welcomeDescription,
           brandMonogram: brandMonogram,
           footerBio: footerBio,
+          footerYear: footerYear,
           footerCopyright: footerCopyright,
           footerTagline: footerTagline,
           announcements: [
