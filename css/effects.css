@@ -1084,16 +1084,26 @@ body.wireframe-mode::after {
 
 @media (max-width: 900px) {
   .dev-floating-trigger {
-    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
-    right: 12px;
+    bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+    left: 14px;
+    right: auto;
     font-size: 0.65rem;
     padding: 5px 10px;
+    z-index: 850;
+    opacity: 0.75;
+  }
+  .dev-floating-trigger:hover,
+  .dev-floating-trigger:active {
+    opacity: 1;
   }
   .dev-inspector-hud {
-    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(82px + env(safe-area-inset-bottom, 0px));
     right: 12px;
     left: 12px;
     width: auto;
+    max-height: 65vh;
+    overflow-y: auto;
+    z-index: 100010;
   }
 }
 

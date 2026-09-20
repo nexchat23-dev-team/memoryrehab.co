@@ -170,7 +170,7 @@ function applyStorefrontTextSettings(settings = {}) {
 // All supported dark mode palettes (name → CSS variable overrides)
 const DARK_PALETTES = {
   'obsidian-rose': {
-    label: '🌹 Obsidian Rose (Default)',
+    label: 'Obsidian Rose (Default)',
     bgBase: '#0a0c12',
     bgGrad: 'radial-gradient(circle at 15% 15%, rgba(147,51,114,0.28) 0%, transparent 45%), radial-gradient(circle at 85% 20%, rgba(99,102,241,0.2) 0%, transparent 50%), radial-gradient(circle at 50% 85%, rgba(236,72,153,0.18) 0%, transparent 55%), linear-gradient(150deg,#07090e 0%,#0d1019 40%,#121422 100%)',
     primary: '#f472b6', primaryHover: '#ec4899',
@@ -185,7 +185,7 @@ const DARK_PALETTES = {
     orb3: 'radial-gradient(circle, rgba(244,114,182,0.28) 0%, rgba(236,72,153,0.05) 70%)',
   },
   'midnight-sapphire': {
-    label: '💎 Midnight Sapphire',
+    label: 'Midnight Sapphire',
     bgBase: '#050810',
     bgGrad: 'radial-gradient(circle at 15% 15%, rgba(37,99,235,0.3) 0%, transparent 45%), radial-gradient(circle at 85% 20%, rgba(6,182,212,0.22) 0%, transparent 50%), radial-gradient(circle at 50% 85%, rgba(99,102,241,0.2) 0%, transparent 55%), linear-gradient(150deg,#030510 0%,#080c18 40%,#0a1022 100%)',
     primary: '#60a5fa', primaryHover: '#3b82f6',
@@ -200,7 +200,7 @@ const DARK_PALETTES = {
     orb3: 'radial-gradient(circle, rgba(6,182,212,0.28) 0%, rgba(37,99,235,0.05) 70%)',
   },
   'forest-emerald': {
-    label: '🌿 Forest Emerald',
+    label: 'Forest Emerald',
     bgBase: '#030f09',
     bgGrad: 'radial-gradient(circle at 15% 15%, rgba(16,185,129,0.28) 0%, transparent 45%), radial-gradient(circle at 85% 20%, rgba(5,150,105,0.22) 0%, transparent 50%), radial-gradient(circle at 50% 85%, rgba(52,211,153,0.15) 0%, transparent 55%), linear-gradient(150deg,#020908 0%,#070f0c 40%,#0a1510 100%)',
     primary: '#34d399', primaryHover: '#10b981',
@@ -215,7 +215,7 @@ const DARK_PALETTES = {
     orb3: 'radial-gradient(circle, rgba(52,211,153,0.28) 0%, rgba(16,185,129,0.05) 70%)',
   },
   'amethyst-galaxy': {
-    label: '✨ Amethyst Galaxy',
+    label: 'Amethyst Galaxy',
     bgBase: '#080510',
     bgGrad: 'radial-gradient(circle at 15% 15%, rgba(168,85,247,0.32) 0%, transparent 45%), radial-gradient(circle at 85% 20%, rgba(139,92,246,0.25) 0%, transparent 50%), radial-gradient(circle at 50% 85%, rgba(196,181,253,0.12) 0%, transparent 55%), linear-gradient(150deg,#05030e 0%,#0c0818 40%,#100a20 100%)',
     primary: '#c084fc', primaryHover: '#a855f7',
@@ -230,7 +230,7 @@ const DARK_PALETTES = {
     orb3: 'radial-gradient(circle, rgba(192,132,252,0.28) 0%, rgba(168,85,247,0.05) 70%)',
   },
   'volcanic-amber': {
-    label: '🔥 Volcanic Amber',
+    label: 'Volcanic Amber',
     bgBase: '#0f0700',
     bgGrad: 'radial-gradient(circle at 15% 15%, rgba(217,119,6,0.3) 0%, transparent 45%), radial-gradient(circle at 85% 20%, rgba(234,88,12,0.22) 0%, transparent 50%), radial-gradient(circle at 50% 85%, rgba(251,191,36,0.12) 0%, transparent 55%), linear-gradient(150deg,#0c0600 0%,#141000 40%,#1a1200 100%)',
     primary: '#fbbf24', primaryHover: '#f59e0b',
@@ -245,7 +245,7 @@ const DARK_PALETTES = {
     orb3: 'radial-gradient(circle, rgba(251,191,36,0.28) 0%, rgba(234,88,12,0.05) 70%)',
   },
   'aurora-coral': {
-    label: '🌅 Aurora Coral',
+    label: 'Aurora Coral',
     bgBase: '#0f0609',
     bgGrad: 'radial-gradient(circle at 15% 15%, rgba(244,63,94,0.28) 0%, transparent 45%), radial-gradient(circle at 85% 20%, rgba(251,113,133,0.2) 0%, transparent 50%), radial-gradient(circle at 50% 85%, rgba(248,113,113,0.18) 0%, transparent 55%), linear-gradient(150deg,#0c040a 0%,#140810 40%,#1a0c14 100%)',
     primary: '#fb7185', primaryHover: '#f43f5e',
@@ -260,7 +260,7 @@ const DARK_PALETTES = {
     orb3: 'radial-gradient(circle, rgba(248,113,113,0.28) 0%, rgba(244,63,94,0.05) 70%)',
   },
   'pure-obsidian': {
-    label: '🌑 Pure Obsidian (Platinum Noir)',
+    label: 'Pure Obsidian (Platinum Noir)',
     bgBase: '#060608',
     bgGrad: 'radial-gradient(circle at 15% 15%, rgba(255,255,255,0.08) 0%, transparent 45%), radial-gradient(circle at 85% 20%, rgba(148,163,184,0.12) 0%, transparent 50%), radial-gradient(circle at 50% 85%, rgba(203,213,225,0.06) 0%, transparent 55%), linear-gradient(150deg,#030304 0%,#08080c 40%,#0f1117 100%)',
     primary: '#f1f5f9', primaryHover: '#e2e8f0',
@@ -275,7 +275,7 @@ const DARK_PALETTES = {
     orb3: 'radial-gradient(circle, rgba(203,213,225,0.2) 0%, rgba(148,163,184,0.03) 70%)',
   },
   'burgundy-noir': {
-    label: '🍷 Burgundy Velvet Noir',
+    label: 'Burgundy Velvet Noir',
     bgBase: '#0c0407',
     bgGrad: 'radial-gradient(circle at 15% 15%, rgba(159,18,57,0.35) 0%, transparent 45%), radial-gradient(circle at 85% 20%, rgba(190,24,93,0.25) 0%, transparent 50%), radial-gradient(circle at 50% 85%, rgba(225,29,72,0.18) 0%, transparent 55%), linear-gradient(150deg,#090205 0%,#13050b 40%,#1c0812 100%)',
     primary: '#fb7185', primaryHover: '#f43f5e',
@@ -290,7 +290,7 @@ const DARK_PALETTES = {
     orb3: 'radial-gradient(circle, rgba(225,29,72,0.3) 0%, rgba(190,24,93,0.05) 70%)',
   },
   'twilight-aurora': {
-    label: '🌌 Twilight Aurora',
+    label: 'Twilight Aurora',
     bgBase: '#060a14',
     bgGrad: 'radial-gradient(circle at 15% 15%, rgba(45,212,191,0.28) 0%, transparent 45%), radial-gradient(circle at 85% 20%, rgba(168,85,247,0.28) 0%, transparent 50%), radial-gradient(circle at 50% 85%, rgba(56,189,248,0.2) 0%, transparent 55%), linear-gradient(150deg,#04060d 0%,#0a1020 40%,#0f172a 100%)',
     primary: '#2dd4bf', primaryHover: '#14b8a6',
@@ -305,7 +305,7 @@ const DARK_PALETTES = {
     orb3: 'radial-gradient(circle, rgba(56,189,248,0.3) 0%, rgba(168,85,247,0.05) 70%)',
   },
   'matcha-noir': {
-    label: '🍵 Matcha Zen Noir',
+    label: 'Matcha Zen Noir',
     bgBase: '#060a07',
     bgGrad: 'radial-gradient(circle at 15% 15%, rgba(101,163,13,0.3) 0%, transparent 45%), radial-gradient(circle at 85% 20%, rgba(22,101,52,0.25) 0%, transparent 50%), radial-gradient(circle at 50% 85%, rgba(234,179,8,0.15) 0%, transparent 55%), linear-gradient(150deg,#040705 0%,#09110a 40%,#101c12 100%)',
     primary: '#a3e635', primaryHover: '#84cc16',
@@ -320,7 +320,7 @@ const DARK_PALETTES = {
     orb3: 'radial-gradient(circle, rgba(163,230,53,0.28) 0%, rgba(22,101,52,0.05) 70%)',
   },
   'cyber-titanium': {
-    label: '🪐 Slate Titanium Noir',
+    label: 'Slate Titanium Noir',
     bgBase: '#080a0f',
     bgGrad: 'radial-gradient(circle at 15% 15%, rgba(71,85,105,0.35) 0%, transparent 45%), radial-gradient(circle at 85% 20%, rgba(14,165,233,0.2) 0%, transparent 50%), radial-gradient(circle at 50% 85%, rgba(100,116,139,0.2) 0%, transparent 55%), linear-gradient(150deg,#05070a 0%,#0b0f17 40%,#141a26 100%)',
     primary: '#38bdf8', primaryHover: '#0284c7',
@@ -335,7 +335,7 @@ const DARK_PALETTES = {
     orb3: 'radial-gradient(circle, rgba(56,189,248,0.28) 0%, rgba(71,85,105,0.05) 70%)',
   },
   'celestial-plum': {
-    label: '🔮 Celestial Plum Noir',
+    label: 'Celestial Plum Noir',
     bgBase: '#09050d',
     bgGrad: 'radial-gradient(circle at 15% 15%, rgba(192,38,211,0.3) 0%, transparent 45%), radial-gradient(circle at 85% 20%, rgba(126,34,206,0.28) 0%, transparent 50%), radial-gradient(circle at 50% 85%, rgba(232,121,249,0.18) 0%, transparent 55%), linear-gradient(150deg,#060309 0%,#0f0717 40%,#180b24 100%)',
     primary: '#e879f9', primaryHover: '#d946ef',
@@ -687,7 +687,7 @@ function removeFromWishlist(id) {
   saveWishlistLocally();
   syncWishlistCardButtons();
   if (typeof window.showToast === 'function') {
-    window.showToast(`Removed ${name} from wishlist`, '🤍');
+    window.showToast(`Removed ${name} from wishlist`, '✦');
   }
 }
 
@@ -782,16 +782,27 @@ function initWishlistPage() {
 
   if (userBanner) {
     const userRaw = localStorage.getItem('mr_current_user');
+    let validUser = null;
     if (userRaw) {
       try {
-        const user = JSON.parse(userRaw);
-        userBanner.innerHTML = `
-          <div class="wishlist-sync-info">
-            <span style="font-size: 1.1rem;">✨</span>
-            <span>Saved to Routine Profile for <strong>${user.name || user.email}</strong>. Synced in the cloud.</span>
-          </div>
-        `;
+        const u = JSON.parse(userRaw);
+        if (u && (u.email || (u.name && u.name.toLowerCase() !== 'google'))) {
+          validUser = u;
+        }
       } catch (e) {}
+    }
+
+    if (validUser) {
+      const displayName = (validUser.name && validUser.name.toLowerCase() !== 'google')
+        ? validUser.name
+        : (validUser.email ? validUser.email.split('@')[0] : 'Client');
+      userBanner.innerHTML = `
+        <div class="wishlist-sync-info">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px;flex-shrink:0;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span>Active Routine Profile: <strong>${displayName}</strong> • Synced to Clinical Cloud</span>
+        </div>
+        <a href="auth.html" class="wishlist-sync-link">Manage Routine Account →</a>
+      `;
     }
   }
 
@@ -845,7 +856,7 @@ function initWishlistPage() {
       const origPrice = (Number(item.originalPrice) > 0 && Number(item.originalPrice) <= 100) ? Number(item.originalPrice) * 1000 : Number(item.originalPrice);
       const hasDiscount = origPrice && origPrice > price;
       const discountPercent = hasDiscount ? Math.round(((origPrice - price) / origPrice) * 100) : 0;
-      const waMsg = encodeURIComponent(`Hi Memory Rehab! 🌿 I would like to order my wishlisted formulation: ${item.name} (${formatCurrency(price)}).`);
+      const waMsg = encodeURIComponent(`Hi Memory Rehab, I would like to order my wishlisted formulation: ${item.name} (${formatCurrency(price)}).`);
 
       return `
         <div class="wishlist-card" data-id="${item.id}">
@@ -933,7 +944,7 @@ function initWishlistPage() {
         }
       });
       if (typeof window.showToast === 'function') {
-        window.showToast(`Moved all ${wishlist.length} formulations to your routine bag!`, '🎉');
+        window.showToast(`Moved all ${wishlist.length} formulations to your routine bag!`, '✦');
       }
       if (typeof window.triggerConfetti === 'function') {
         window.triggerConfetti();
@@ -962,11 +973,11 @@ function initWishlistPage() {
         const shareUrl = window.location.href.split('?')[0];
         await navigator.clipboard.writeText(shareUrl);
         if (typeof window.showToast === 'function') {
-          window.showToast('Wishlist link copied to clipboard!', '📋');
+          window.showToast('Wishlist link copied to clipboard!', '✦');
         }
       } catch (err) {
         if (typeof window.showToast === 'function') {
-          window.showToast('Wishlist link ready to share!', '🔗');
+          window.showToast('Wishlist link ready to share!', '✦');
         }
       }
     };
@@ -1061,7 +1072,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       updateAuthHeader();
       if (userAuthDropdown) userAuthDropdown.classList.remove('show');
-      showToast('Signed out of routine session', '👋');
+      showToast('Signed out of routine session', '✦');
     });
   }
 
@@ -1168,7 +1179,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const darkLabel = (DARK_PALETTES[darkKey] || {}).label || 'Dark Mode';
       showToast(
         newTheme === 'dark' ? `${darkLabel} activated` : 'Pastel Mode restored',
-        newTheme === 'dark' ? '🌙' : '☀️'
+        '✦'
       );
     });
   });
@@ -1302,7 +1313,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     activeTotalCost = subtotal + activeShippingCost;
     if (checkoutShippingCost) {
-      checkoutShippingCost.textContent = activeShippingCost === 0 ? 'FREE (Unlocked 🎉)' : formatCurrency(activeShippingCost);
+      checkoutShippingCost.textContent = activeShippingCost === 0 ? 'FREE (Threshold Qualified)' : formatCurrency(activeShippingCost);
     }
     if (checkoutTotalDisplay) {
       checkoutTotalDisplay.textContent = formatCurrency(activeTotalCost);
@@ -1310,24 +1321,39 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function openCart() {
-    if (cartDrawer && cartBackdrop) {
-      cartDrawer.classList.add('open');
-      cartBackdrop.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
+    const d = document.getElementById('cartDrawer') || cartDrawer;
+    const b = document.getElementById('cartBackdrop') || cartBackdrop;
+    if (d) d.classList.add('open');
+    if (b) b.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    document.body.classList.add('cart-open');
   }
 
   function closeCartDrawer() {
-    if (cartDrawer && cartBackdrop) {
-      cartDrawer.classList.remove('open');
-      cartBackdrop.classList.remove('open');
-      document.body.style.overflow = '';
-    }
+    const d = document.getElementById('cartDrawer') || cartDrawer;
+    const b = document.getElementById('cartBackdrop') || cartBackdrop;
+    if (d) d.classList.remove('open');
+    if (b) b.classList.remove('open');
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+    document.body.classList.remove('cart-open');
   }
+
+  window.openCart = openCart;
+  window.closeCartDrawer = closeCartDrawer;
 
   if (cartToggle) cartToggle.addEventListener('click', openCart);
   if (closeCart) closeCart.addEventListener('click', closeCartDrawer);
   if (cartBackdrop) cartBackdrop.addEventListener('click', closeCartDrawer);
+
+  // Delegated fallback for all devices & mobile navigation
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('#closeCart') || e.target.closest('.cart-close-btn') || e.target.closest('[data-close-cart]')) {
+      e.preventDefault();
+      closeCartDrawer();
+    }
+  });
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
@@ -1354,7 +1380,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!shippingGoalText || !shippingGoalPercent || !shippingProgressFill) return;
 
     if (total >= freeShippingGoal) {
-      shippingGoalText.textContent = '🎉 You unlocked Free Express Shipping!';
+      shippingGoalText.textContent = '✓ Complimentary Express Shipping Unlocked!';
       shippingGoalPercent.textContent = '100%';
       shippingProgressFill.style.width = '100%';
     } else {
@@ -1484,7 +1510,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     renderCart();
     openCart();
-    showToast(`Added ${product.name} to routine bag!`, '🛍️');
+    showToast(`Added ${product.name} to routine bag!`, '✓');
   }
 
   window.addToCart = addToCart;
@@ -1502,7 +1528,7 @@ document.addEventListener('DOMContentLoaded', () => {
         quantity: 1
       };
       addToCart(bundleItem);
-      showToast('🎉 Complete 3-Step Routine Added! You saved ₦19,000!', '✨');
+      showToast('Complete 3-Step Routine Added! Savings Applied: ₦19,000', '✦');
     });
   }
 
@@ -1512,7 +1538,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (checkoutBtn) {
     checkoutBtn.addEventListener('click', async () => {
       if (cart.length === 0) {
-        showToast('Your routine bag is empty!', '⚠️');
+        showToast('Your routine bag is empty!', '✦');
         return;
       }
 
@@ -1732,7 +1758,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- ORDER PLACEMENT & LAB CELEBRATION ENGINE ---
   function completeOrderFlow({ customerName, customerPhone, email, address, country, method = 'whatsapp' } = {}) {
     if (!cart || cart.length === 0) {
-      showToast('Your routine bag is empty!', '⚠️');
+      showToast('Your routine bag is empty!', '✦');
       return;
     }
 
@@ -1751,29 +1777,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const achievement = calculateOrderAchievement(cart, total);
     const freeThreshold = getFreeShippingThreshold();
 
-    // Build rich formatted WhatsApp order text
-    let waText = `🌿 *MEMORY REHAB LAB — OFFICIAL ORDER #${orderId}* 🌿%0A`;
-    waText += `📅 Date: ${orderDate}%0A`;
-    waText += `-----------------------------------%0A`;
-    waText += `🛍️ *ORDERED ROUTINE ACTIVES:*%0A`;
+    // Build rich formatted WhatsApp order text (Emoji-free Advanced Clinical Format)
+    let waText = `*MEMORY REHAB CLINICAL DISPENSARY — PRESCRIPTION ORDER #${orderId}*%0A`;
+    waText += `Date: ${orderDate}%0A`;
+    waText += `===================================%0A`;
+    waText += `*PRESCRIBED ROUTINE ACTIVES:*%0A`;
     cart.forEach((item, i) => {
-      waText += `${i + 1}. ${item.quantity}x *${item.name}* (${item.size || 'Full Size'}) — ${formatCurrency(item.price * item.quantity)}%0A`;
+      waText += `[${i + 1}] ${item.quantity}x *${item.name}* (${item.size || 'Full Size'}) — ${formatCurrency(item.price * item.quantity)}%0A`;
     });
-    waText += `-----------------------------------%0A`;
-    waText += `📦 *Subtotal:* ${formatCurrency(subtotal)}%0A`;
-    waText += `🚚 *Shipping:* ${shipping === 0 ? `FREE EXPRESS (${formatCurrency(freeThreshold)}+ Unlocked)` : formatCurrency(shipping)}%0A`;
-    waText += `💰 *TOTAL DUE:* ${formatCurrency(total)}%0A`;
-    waText += `🏆 *Routine Rank:* ${achievement.levelIcon} ${achievement.levelName} (Streak: ${achievement.streak})%0A`;
-    waText += `⏳ *Routine Journey:* ${achievement.tenure.formattedText}%0A`;
-    waText += `-----------------------------------%0A`;
-    waText += `📍 *DELIVERY DETAILS:*%0A`;
-    waText += `• Client: ${name}%0A`;
-    if (phone) waText += `• Phone: ${phone}%0A`;
-    if (addr) waText += `• Address: ${addr}%0A`;
+    waText += `===================================%0A`;
+    waText += `*Subtotal:* ${formatCurrency(subtotal)}%0A`;
+    waText += `*Logistics:* ${shipping === 0 ? `Complimentary Express Dispatch (${formatCurrency(freeThreshold)}+ Threshold Qualified)` : formatCurrency(shipping)}%0A`;
+    waText += `*Total Invoiced:* ${formatCurrency(total)}%0A`;
+    waText += `*Clinical Tier:* [${achievement.tierLabel}] ${achievement.levelName} (Dispensary Streak: ${achievement.streak} Batches)%0A`;
+    waText += `*Tenure Index:* ${achievement.tenure.formattedText}%0A`;
+    waText += `===================================%0A`;
+    waText += `*DISPATCH LOGISTICS SPECIFICATIONS:*%0A`;
+    waText += `• Client Name: ${name}%0A`;
+    if (phone) waText += `• Tel: ${phone}%0A`;
+    if (addr) waText += `• Shipping Address: ${addr}%0A`;
     waText += `• Destination: ${dest}%0A`;
     if (em) waText += `• Email: ${em}%0A`;
-    waText += `• Payment: WhatsApp Concierge / Direct Bank Transfer%0A%0A`;
-    waText += `Kindly confirm availability and account details for immediate lab packaging. Thank you! 🙏`;
+    waText += `• Settlement Protocol: Concierge Verification / Direct Bank Clearing%0A%0A`;
+    waText += `Formal acknowledgement requested for laboratory batch packaging and sterile dispatch sealing.`;
 
     // Persist order in local history
     try {
@@ -1832,15 +1858,19 @@ document.addEventListener('DOMContentLoaded', () => {
         <div style="color:var(--text-muted); font-size:0.8rem; max-height:80px; overflow-y:auto; line-height:1.4;">
           ${cart.map(i => `• ${i.quantity}x ${i.name}`).join('<br/>')}
         </div>
-        <div style="margin-top:8px; padding-top:6px; border-top:1px dashed var(--glass-border); font-size:0.8rem; color:var(--text-muted);">
-          📍 Destination: <strong>${addr ? `${addr}, ${dest}` : dest}</strong>
+        <div style="margin-top:8px; padding-top:6px; border-top:1px dashed var(--glass-border); font-size:0.8rem; color:var(--text-muted); display:flex; align-items:center; gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>Dispatch Destination: <strong>${addr ? `${addr}, ${dest}` : dest}</strong></span>
         </div>
 
-        <!-- GAMIFIED ACHIEVEMENT STREAK & LEVEL CARD -->
+        <!-- ADVANCED CLINICAL ACHIEVEMENT STREAK & LEVEL CARD -->
         <div class="achievement-streak-card">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <span class="streak-fire-pill">🔥 <strong>Streak: ${achievement.streak} Order${achievement.streak > 1 ? 's' : ''}</strong></span>
-            <span class="streak-badge-pill">${achievement.levelIcon} ${achievement.levelName}</span>
+            <span class="streak-fire-pill">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px; margin-right:4px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <strong>Streak: ${achievement.streak} Batch${achievement.streak > 1 ? 'es' : ''}</strong>
+            </span>
+            <span class="streak-badge-pill">${achievement.tierLabel} • ${achievement.levelName}</span>
           </div>
           <div class="streak-meter-track">
             <div class="streak-meter-fill" style="width:${achievement.progressPercent}%;"></div>
@@ -1850,10 +1880,15 @@ document.addEventListener('DOMContentLoaded', () => {
             <span>${achievement.nextLevelText}</span>
           </div>
           <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px;">
-            ${achievement.badges.map(b => `<span class="unlocked-badge-chip">${b.icon} ${b.label}</span>`).join('')}
+            ${achievement.badges.map(b => `<span class="unlocked-badge-chip">${b.iconSvg || ''} ${b.label}</span>`).join('')}
           </div>
           <div class="streak-perk-box">
-            🎁 <strong>Perk Unlocked:</strong> ${achievement.perkText}
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>
+            <strong>Clinical Privilege:</strong> ${achievement.perkText}
+          </div>
+          <div class="streak-tenure-row" style="margin-top:8px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.08); font-size:0.75rem; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center;">
+            <span>Routine Regimen Tenure:</span>
+            <span style="font-weight:700; color:var(--primary);">${achievement.tenure.formattedText}</span>
           </div>
         </div>
       `;
@@ -1877,7 +1912,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Open WhatsApp
     window.open(waUrl, '_blank');
-    showToast(`Order #${orderId} confirmed! Opening WhatsApp...`, '🎉');
+    showToast(`Order #${orderId} confirmed! Opening WhatsApp...`, '✓');
   }
 
   // Direct Order via WhatsApp buttons (Cart drawer & PDP)
@@ -1885,7 +1920,7 @@ document.addEventListener('DOMContentLoaded', () => {
   whatsappOrderBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       if (!cart || cart.length === 0) {
-        window.open('https://wa.me/2349112488271?text=Hello%20Memory%20Rehab!%20%F0%9F%8C%BF%20I%20would%20like%20to%20inquire%20about%20your%20clinical%20barrier%20skincare%20routines.', '_blank');
+        window.open('https://wa.me/2349112488271?text=Hello%20Memory%20Rehab,%20I%20would%20like%20to%20inquire%20about%20your%20clinical%20barrier%20skincare%20routines.', '_blank');
         return;
       }
       const checkoutModal = document.getElementById('checkoutModal');
@@ -1950,7 +1985,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Paystack is not yet configured or failed: seamlessly fallback to WhatsApp Order with full details and confetti!
-    showToast('Connecting you to WhatsApp Concierge for instant confirmation & dispatch...', '🌿');
+    showToast('Connecting you to WhatsApp Concierge for instant confirmation & dispatch...', '✦');
     completeOrderFlow({ method: 'whatsapp' });
   });
 
@@ -2881,7 +2916,7 @@ function hydrateStorefrontCatalog() {
         newCard.dataset.reviews = p.reviews || '12';
         newCard.dataset.size = p.size || '30ml';
         newCard.dataset.step = p.step || 'Step 2: Target & Treat';
-        newCard.dataset.skinType = p.skinType || '🌿 For: All Skin Types';
+        newCard.dataset.skinType = p.skinType || 'For: All Skin Types';
         newCard.dataset.description = p.summary || 'Restorative botanical skincare formula.';
         newCard.dataset.ingredients = Array.isArray(p.ingredients) ? p.ingredients.join(', ') : (p.ingredients || 'Botanical Actives');
 
@@ -3122,7 +3157,7 @@ function initMaintenanceMode(settings) {
 
       <div class="maintenance-staff-row">
         <button type="button" class="maintenance-staff-btn" id="openStaffBypassModalBtn">
-          🔑 Staff &amp; Pharmacist Access
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:5px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Staff &amp; Pharmacist Access
         </button>
       </div>
     </div>

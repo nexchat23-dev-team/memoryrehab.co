@@ -1130,6 +1130,11 @@
     const closeBtn = document.getElementById('devHudCloseBtn');
     if (closeBtn) closeBtn.addEventListener('click', toggleHUD);
 
+    // Pre-populate telemetry immediately so values are never '--'
+    updateDOMStats();
+    window.addEventListener('resize', updateDOMStats, { passive: true });
+    window.addEventListener('load', updateDOMStats, { passive: true });
+
     // Keyboard shortcut Ctrl+Shift+D / Cmd+Shift+D
     window.addEventListener('keydown', function (e) {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
