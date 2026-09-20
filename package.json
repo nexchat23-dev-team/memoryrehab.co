@@ -4,7 +4,6 @@
   "private": true,
   "description": "Memory Rehab Lab — Luxury Clinical Barrier Skincare Storefront",
   "scripts": {
-    "build": "echo \"Build complete\"",
     "start": "node server.js"
   },
   "keywords": [
