@@ -378,25 +378,45 @@
           <h2 class="admin-card-title">🖼️ Visual Assets &amp; Banner Images</h2>
           <p class="admin-card-desc">Upload or paste image URLs for the hero product banner and the welcome popup without changing the codebase.</p>
 
-          <div class="admin-grid-form">
-            <div class="admin-field-group" style="grid-column: 1 / -1;">
-              <label class="admin-label" for="settingHeroImageUrl">Hero Image URL</label>
-              <input type="url" id="settingHeroImageUrl" class="admin-input" value="photo_2026-09-09_17-33-58.jpg" />
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 16px;">
+            <!-- Hero Asset Card -->
+            <div class="admin-subcard" style="display: flex; flex-direction: column; gap: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label class="admin-label" style="margin: 0; font-weight: 700;">🌟 Hero Product Banner</label>
+                <span id="heroImageStatusBadge" style="font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; background: rgba(16, 185, 129, 0.12); color: #10b981; font-weight: 600;">Active</span>
+              </div>
+              <div class="admin-upload-zone" id="heroUploadZone" style="padding: 14px; margin-bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 140px;" title="Click to upload new hero banner image">
+                <img id="heroImagePreview" src="photo_2026-09-09_17-33-58.jpg" alt="Hero Banner Preview" style="max-height: 120px; max-width: 100%; border-radius: var(--radius-sm); object-fit: cover; display: block; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);" />
+                <span style="font-size: 0.78rem; font-weight: 600; color: var(--primary);">📷 Click or select below to replace hero photo</span>
+              </div>
+              <div>
+                <label class="admin-label" for="heroImageUploadInput" style="font-size: 0.76rem;">Select file from device:</label>
+                <input type="file" id="heroImageUploadInput" class="admin-input" accept="image/*" style="font-size: 0.8rem; padding: 6px 10px;" />
+              </div>
+              <div>
+                <label class="admin-label" for="settingHeroImageUrl" style="font-size: 0.76rem;">Or paste image URL:</label>
+                <input type="url" id="settingHeroImageUrl" class="admin-input" value="photo_2026-09-09_17-33-58.jpg" style="font-size: 0.82rem;" />
+              </div>
             </div>
 
-            <div class="admin-field-group" style="grid-column: 1 / -1;">
-              <label class="admin-label" for="settingWelcomeImageUrl">Welcome Popup Image URL</label>
-              <input type="url" id="settingWelcomeImageUrl" class="admin-input" value="photo_2026-09-09_20-12-25.jpg" />
-            </div>
-
-            <div class="admin-field-group">
-              <label class="admin-label" for="heroImageUploadInput">Hero Image Upload</label>
-              <input type="file" id="heroImageUploadInput" class="admin-input" accept="image/*" />
-            </div>
-
-            <div class="admin-field-group">
-              <label class="admin-label" for="welcomeImageUploadInput">Welcome Image Upload</label>
-              <input type="file" id="welcomeImageUploadInput" class="admin-input" accept="image/*" />
+            <!-- Welcome Asset Card -->
+            <div class="admin-subcard" style="display: flex; flex-direction: column; gap: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label class="admin-label" style="margin: 0; font-weight: 700;">🌸 Welcome Popup Banner</label>
+                <span id="welcomeImageStatusBadge" style="font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; background: rgba(16, 185, 129, 0.12); color: #10b981; font-weight: 600;">Active</span>
+              </div>
+              <div class="admin-upload-zone" id="welcomeUploadZone" style="padding: 14px; margin-bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 140px;" title="Click to upload new welcome popup image">
+                <img id="welcomeImagePreview" src="photo_2026-09-09_20-12-25.jpg" alt="Welcome Popup Preview" style="max-height: 120px; max-width: 100%; border-radius: var(--radius-sm); object-fit: cover; display: block; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);" />
+                <span style="font-size: 0.78rem; font-weight: 600; color: var(--primary);">📷 Click or select below to replace popup photo</span>
+              </div>
+              <div>
+                <label class="admin-label" for="welcomeImageUploadInput" style="font-size: 0.76rem;">Select file from device:</label>
+                <input type="file" id="welcomeImageUploadInput" class="admin-input" accept="image/*" style="font-size: 0.8rem; padding: 6px 10px;" />
+              </div>
+              <div>
+                <label class="admin-label" for="settingWelcomeImageUrl" style="font-size: 0.76rem;">Or paste image URL:</label>
+                <input type="url" id="settingWelcomeImageUrl" class="admin-input" value="photo_2026-09-09_20-12-25.jpg" style="font-size: 0.82rem;" />
+              </div>
             </div>
           </div>
 
@@ -808,11 +828,16 @@
 
         <!-- 1. PHOTO & CORE SPECS -->
         <input type="file" id="modalFileInput" accept="image/*" style="display: none;" />
-        <div class="admin-upload-zone" id="modalUploadZone">
-          <img id="modalImgPreview" src="" alt="" style="max-height: 140px; border-radius: var(--radius-md); margin-bottom: 10px; display: none;" />
+        <div class="admin-upload-zone" id="modalUploadZone" style="position: relative; overflow: hidden; cursor: pointer;">
+          <div id="modalPreviewContainer" style="display: none; margin-bottom: 12px; align-items: center; justify-content: center; flex-direction: column;">
+            <div style="position: relative; display: inline-block;">
+              <img id="modalImgPreview" src="" alt="Product Picture Preview" style="max-height: 180px; max-width: 100%; border-radius: var(--radius-md); object-fit: contain; box-shadow: 0 4px 16px rgba(0,0,0,0.15); display: none;" />
+              <span id="modalImgStatusBadge" style="position: absolute; bottom: 8px; right: 8px; background: rgba(16, 185, 129, 0.92); color: #fff; font-size: 0.72rem; font-weight: 600; padding: 3px 8px; border-radius: 999px; backdrop-filter: blur(4px);">Active</span>
+            </div>
+          </div>
           <div id="modalUploadPrompt">
-            <strong>📷 Click here to Upload a New Product Picture (Vercel Blob)</strong>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 4px 0 0;">Supports JPG, PNG, WebP — uploads directly to Vercel CDN</p>
+            <strong id="modalUploadPromptTitle">📷 Click or Drag &amp; Drop to Upload Product Picture</strong>
+            <p id="modalUploadPromptSub" style="font-size: 0.8rem; color: var(--text-muted); margin: 4px 0 0;">Supports JPG, PNG, WebP — instant preview &amp; Vercel CDN sync</p>
           </div>
         </div>
 
@@ -1257,8 +1282,16 @@
             if (ls.welcomeEyebrow) document.getElementById('settingWelcomeEyebrow').value = ls.welcomeEyebrow;
             if (ls.welcomeTitle) document.getElementById('settingWelcomeTitle').value = ls.welcomeTitle;
             if (ls.welcomeDescription) document.getElementById('settingWelcomeDescription').value = ls.welcomeDescription;
-            if (ls.heroImageUrl) document.getElementById('settingHeroImageUrl').value = ls.heroImageUrl;
-            if (ls.welcomeImageUrl) document.getElementById('settingWelcomeImageUrl').value = ls.welcomeImageUrl;
+            if (ls.heroImageUrl) {
+              document.getElementById('settingHeroImageUrl').value = ls.heroImageUrl;
+              const hp = document.getElementById('heroImagePreview');
+              if (hp) hp.src = ls.heroImageUrl;
+            }
+            if (ls.welcomeImageUrl) {
+              document.getElementById('settingWelcomeImageUrl').value = ls.welcomeImageUrl;
+              const wp = document.getElementById('welcomeImagePreview');
+              if (wp) wp.src = ls.welcomeImageUrl;
+            }
             if (ls.brandMonogram) document.getElementById('settingBrandMonogram').value = ls.brandMonogram;
             if (ls.footerBio) document.getElementById('settingFooterBio').value = ls.footerBio;
             if (ls.footerYear) document.getElementById('settingFooterYear').value = ls.footerYear;
@@ -1306,8 +1339,16 @@
             if (data.welcomeEyebrow) document.getElementById('settingWelcomeEyebrow').value = data.welcomeEyebrow;
             if (data.welcomeTitle) document.getElementById('settingWelcomeTitle').value = data.welcomeTitle;
             if (data.welcomeDescription) document.getElementById('settingWelcomeDescription').value = data.welcomeDescription;
-            if (data.heroImageUrl) document.getElementById('settingHeroImageUrl').value = data.heroImageUrl;
-            if (data.welcomeImageUrl) document.getElementById('settingWelcomeImageUrl').value = data.welcomeImageUrl;
+            if (data.heroImageUrl) {
+              document.getElementById('settingHeroImageUrl').value = data.heroImageUrl;
+              const hp = document.getElementById('heroImagePreview');
+              if (hp) hp.src = data.heroImageUrl;
+            }
+            if (data.welcomeImageUrl) {
+              document.getElementById('settingWelcomeImageUrl').value = data.welcomeImageUrl;
+              const wp = document.getElementById('welcomeImagePreview');
+              if (wp) wp.src = data.welcomeImageUrl;
+            }
             if (data.brandMonogram) document.getElementById('settingBrandMonogram').value = data.brandMonogram;
             if (data.footerBio) document.getElementById('settingFooterBio').value = data.footerBio;
             if (data.footerYear) document.getElementById('settingFooterYear').value = data.footerYear;
@@ -1628,17 +1669,60 @@
       async function uploadSelectedImage(file, targetKey) {
         if (!file) return;
 
-        const uploadedUrl = await uploadImageToStorage(file, targetKey === 'hero' ? 'hero-assets' : 'welcome-assets');
+        const isHero = targetKey === 'hero';
+        const previewImg = document.getElementById(isHero ? 'heroImagePreview' : 'welcomeImagePreview');
+        const badgeEl = document.getElementById(isHero ? 'heroImageStatusBadge' : 'welcomeImageStatusBadge');
+        const fieldId = isHero ? 'settingHeroImageUrl' : 'settingWelcomeImageUrl';
+        const inputEl = document.getElementById(fieldId);
+
+        // 1. INSTANT PREVIEW (0ms latency — instant visual feedback on card)
+        if (previewImg) {
+          previewImg.src = URL.createObjectURL(file);
+          previewImg.style.display = 'block';
+          previewImg.style.opacity = '0.8';
+        }
+        if (badgeEl) {
+          badgeEl.textContent = '⏳ Uploading...';
+          badgeEl.style.background = 'rgba(234, 179, 8, 0.15)';
+          badgeEl.style.color = '#eab308';
+        }
+
+        // 2. Upload to Vercel Blob CDN in background
+        const uploadedUrl = await uploadImageToStorage(file, isHero ? 'hero-assets' : 'welcome-assets');
         const finalUrl = uploadedUrl || null;
 
-        const fieldId = targetKey === 'hero' ? 'settingHeroImageUrl' : 'settingWelcomeImageUrl';
-        const inputEl = document.getElementById(fieldId);
-        if (inputEl) inputEl.value = finalUrl || '';
+        if (previewImg) previewImg.style.opacity = '1';
+
+        if (finalUrl) {
+          if (inputEl) inputEl.value = finalUrl;
+          if (previewImg) previewImg.src = finalUrl;
+          if (badgeEl) {
+            badgeEl.textContent = '✓ CDN Live';
+            badgeEl.style.background = 'rgba(16, 185, 129, 0.15)';
+            badgeEl.style.color = '#10b981';
+          }
+        } else {
+          // Fallback to data URL
+          const reader = new FileReader();
+          reader.onload = async function(evt) {
+            const dataUrl = evt.target.result;
+            if (inputEl) inputEl.value = dataUrl;
+            if (previewImg) previewImg.src = dataUrl;
+            if (badgeEl) {
+              badgeEl.textContent = '✓ Ready';
+              badgeEl.style.background = 'rgba(16, 185, 129, 0.15)';
+              badgeEl.style.color = '#10b981';
+            }
+            const fallbackSettings = { ...settings, ...{ [isHero ? 'heroImageUrl' : 'welcomeImageUrl']: dataUrl } };
+            persistSettingsLocally(fallbackSettings);
+          };
+          reader.readAsDataURL(file);
+        }
 
         const settings = JSON.parse(localStorage.getItem('mr_store_settings') || '{}');
-        const updates = targetKey === 'hero'
-          ? { heroImageUrl: finalUrl || settings.heroImageUrl || 'photo_2026-09-09_17-33-58.jpg' }
-          : { welcomeImageUrl: finalUrl || settings.welcomeImageUrl || 'photo_2026-09-09_20-12-25.jpg' };
+        const updates = isHero
+          ? { heroImageUrl: finalUrl || inputEl?.value || 'photo_2026-09-09_17-33-58.jpg' }
+          : { welcomeImageUrl: finalUrl || inputEl?.value || 'photo_2026-09-09_20-12-25.jpg' };
 
         const nextSettings = { ...settings, ...updates };
         persistSettingsLocally(nextSettings);
@@ -1647,36 +1731,45 @@
           await db.collection('store_settings').doc('general').set(updates, { merge: true });
           if (typeof window.showToast === 'function') {
             if (finalUrl) {
-              window.showToast(targetKey === 'hero' ? 'Hero image uploaded to Vercel Blob!' : 'Welcome image uploaded to Vercel Blob!', '🖼️');
+              window.showToast(isHero ? 'Hero banner uploaded to Vercel Blob!' : 'Welcome banner uploaded to Vercel Blob!', '🖼️');
             } else {
-              window.showToast(targetKey === 'hero' ? 'Storage upload failed, hero image was kept locally.' : 'Storage upload failed, welcome image was kept locally.', '⚠️');
+              window.showToast(isHero ? 'Hero banner preview ready & saved!' : 'Welcome banner preview ready & saved!', '📷');
             }
           }
         } catch (err) {
           console.warn('Image upload sync warning:', err.message);
         }
-
-        if (!finalUrl) {
-          const reader = new FileReader();
-          reader.onload = async function(evt) {
-            const dataUrl = evt.target.result;
-            if (inputEl) inputEl.value = dataUrl;
-            const fallbackSettings = { ...settings, ...{ [targetKey === 'hero' ? 'heroImageUrl' : 'welcomeImageUrl']: dataUrl } };
-            persistSettingsLocally(fallbackSettings);
-          };
-          reader.readAsDataURL(file);
-        }
       }
+
+      // Visual Asset dropzones & click-to-upload
+      document.getElementById('heroUploadZone')?.addEventListener('click', () => {
+        document.getElementById('heroImageUploadInput')?.click();
+      });
+      document.getElementById('welcomeUploadZone')?.addEventListener('click', () => {
+        document.getElementById('welcomeImageUploadInput')?.click();
+      });
+
+      // Live URL input updates preview instantly
+      document.getElementById('settingHeroImageUrl')?.addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        const hp = document.getElementById('heroImagePreview');
+        if (hp && val) hp.src = val;
+      });
+      document.getElementById('settingWelcomeImageUrl')?.addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        const wp = document.getElementById('welcomeImagePreview');
+        if (wp && val) wp.src = val;
+      });
 
       document.getElementById('heroImageUploadInput')?.addEventListener('change', async (e) => {
         const file = e.target.files && e.target.files[0];
-        await uploadSelectedImage(file, 'hero');
+        if (file) await uploadSelectedImage(file, 'hero');
         e.target.value = '';
       });
 
       document.getElementById('welcomeImageUploadInput')?.addEventListener('change', async (e) => {
         const file = e.target.files && e.target.files[0];
-        await uploadSelectedImage(file, 'welcome');
+        if (file) await uploadSelectedImage(file, 'welcome');
         e.target.value = '';
       });
 
@@ -1811,11 +1904,27 @@
 
       // Quick Upload Photo from table row
       tableRowFileInput?.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
+        const file = e.target.files && e.target.files[0];
         if (!file || !targetUploadRowId) return;
+
+        // 1. Instant thumbnail preview in table row (0ms latency)
+        const localBlobUrl = URL.createObjectURL(file);
+        const tr = document.querySelector('tr[data-id="' + targetUploadRowId + '"]');
+        if (tr) {
+          const img = tr.querySelector('.admin-thumb-wrap img');
+          if (img) {
+            img.src = localBlobUrl;
+            img.style.opacity = '0.6';
+          }
+        }
 
         const uploadedUrl = await uploadImageToStorage(file, 'products');
         const finalUrl = uploadedUrl || null;
+
+        if (tr) {
+          const img = tr.querySelector('.admin-thumb-wrap img');
+          if (img) img.style.opacity = '1';
+        }
 
         if (!finalUrl) {
           const reader = new FileReader();
@@ -1823,7 +1932,6 @@
             const dataUrl = evt.target.result;
             currentProducts[targetUploadRowId].image = dataUrl;
 
-            const tr = document.querySelector('tr[data-id="' + targetUploadRowId + '"]');
             if (tr) {
               const img = tr.querySelector('.admin-thumb-wrap img');
               if (img) img.src = dataUrl;
@@ -1844,7 +1952,6 @@
 
         currentProducts[targetUploadRowId].image = finalUrl;
 
-        const tr = document.querySelector('tr[data-id="' + targetUploadRowId + '"]');
         if (tr) {
           const img = tr.querySelector('.admin-thumb-wrap img');
           if (img) img.src = finalUrl;
@@ -1915,11 +2022,29 @@
         document.getElementById('editReview2Type').value = revs[1]?.type || 'Dry / Compromised';
         document.getElementById('editReview2Body').value = revs[1]?.body || 'The holy grail for barrier repair. So lightweight yet deeply hydrating.';
 
+        const container = document.getElementById('modalPreviewContainer');
+        const badge = document.getElementById('modalImgStatusBadge');
+        const promptTitle = document.getElementById('modalUploadPromptTitle');
+        const promptSub = document.getElementById('modalUploadPromptSub');
+
         if (p.image) {
           modalImgPreview.src = p.image;
+          modalImgPreview.removeAttribute('data-fallback');
           modalImgPreview.style.display = 'block';
+          if (container) container.style.display = 'flex';
+          if (badge) {
+            badge.textContent = 'Current Photo';
+            badge.style.background = 'rgba(16, 185, 129, 0.92)';
+          }
+          if (promptTitle) promptTitle.textContent = '📷 Click or Drag to replace photo';
+          if (promptSub) promptSub.textContent = 'Supports JPG, PNG, WebP — uploads directly to Vercel CDN';
         } else {
+          modalImgPreview.src = '';
+          modalImgPreview.removeAttribute('data-fallback');
           modalImgPreview.style.display = 'none';
+          if (container) container.style.display = 'none';
+          if (promptTitle) promptTitle.textContent = '📷 Click or Drag & Drop to Upload Product Picture';
+          if (promptSub) promptSub.textContent = 'Supports JPG, PNG, WebP — instant preview & Vercel CDN sync';
         }
 
         editProductModal.classList.add('open');
@@ -1961,35 +2086,98 @@
         }
       });
 
+      async function handleModalFile(file) {
+        if (!file) return;
+
+        // 1. INSTANT PREVIEW (0ms latency, picture immediately appears on upload card!)
+        const localBlobUrl = URL.createObjectURL(file);
+        const container = document.getElementById('modalPreviewContainer');
+        const badge = document.getElementById('modalImgStatusBadge');
+        const promptTitle = document.getElementById('modalUploadPromptTitle');
+        const promptSub = document.getElementById('modalUploadPromptSub');
+
+        if (container) container.style.display = 'flex';
+        modalImgPreview.src = localBlobUrl;
+        modalImgPreview.style.display = 'block';
+        modalImgPreview.style.opacity = '0.75';
+
+        if (badge) {
+          badge.textContent = '⏳ Uploading...';
+          badge.style.background = 'rgba(234, 179, 8, 0.92)';
+        }
+        if (promptTitle) promptTitle.textContent = '⏳ Syncing photo with Vercel CDN...';
+        if (promptSub) promptSub.textContent = 'Photo preview active! Uploading in background...';
+
+        // Prepare local base64 fallback in parallel so if user saves immediately before CDN finishes, it never loses the image
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          modalImgPreview.dataset.fallback = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+
+        // 2. Upload to Vercel Blob CDN in background
+        const uploadedUrl = await uploadImageToStorage(file, 'products');
+        modalImgPreview.style.opacity = '1';
+
+        if (uploadedUrl) {
+          modalImgPreview.src = uploadedUrl;
+          modalImgPreview.removeAttribute('data-fallback');
+          if (badge) {
+            badge.textContent = '✓ Cloud Synced';
+            badge.style.background = 'rgba(16, 185, 129, 0.92)';
+          }
+          if (promptTitle) promptTitle.textContent = '✓ Photo uploaded to Vercel CDN!';
+          if (promptSub) promptSub.textContent = 'Click or drag a new file here to replace';
+          if (typeof window.showToast === 'function') {
+            window.showToast('Product photo uploaded to Vercel Blob!', '📷');
+          }
+        } else {
+          // Fallback to data URL
+          if (modalImgPreview.dataset.fallback) {
+            modalImgPreview.src = modalImgPreview.dataset.fallback;
+          }
+          if (badge) {
+            badge.textContent = '✓ Ready to Save';
+            badge.style.background = 'rgba(16, 185, 129, 0.92)';
+          }
+          if (promptTitle) promptTitle.textContent = '✓ Photo loaded & ready to save!';
+          if (promptSub) promptSub.textContent = 'Click or drag a new file here to replace';
+        }
+      }
+
       modalUploadZone?.addEventListener('click', (e) => {
         if (e.target.id !== 'modalFileInput') {
           modalFileInput?.click();
         }
       });
 
-      modalFileInput?.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        modalImgPreview.style.opacity = '0.5';
-        const uploadedUrl = await uploadImageToStorage(file, 'products');
-        modalImgPreview.style.opacity = '1';
-
-        if (uploadedUrl) {
-          modalImgPreview.src = uploadedUrl;
-          modalImgPreview.style.display = 'block';
-          if (typeof window.showToast === 'function') {
-            window.showToast('Product photo uploaded to Vercel Blob!', '📷');
-          }
-        } else {
-          const reader = new FileReader();
-          reader.onload = function(evt) {
-            modalImgPreview.src = evt.target.result;
-            modalImgPreview.style.display = 'block';
-          };
-          reader.readAsDataURL(file);
+      // Drag and drop support on modalUploadZone
+      ['dragenter', 'dragover'].forEach(eventName => {
+        modalUploadZone?.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          modalUploadZone.style.borderColor = 'var(--primary)';
+          modalUploadZone.style.background = 'rgba(244, 139, 179, 0.12)';
+        });
+      });
+      ['dragleave', 'drop'].forEach(eventName => {
+        modalUploadZone?.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          modalUploadZone.style.borderColor = '';
+          modalUploadZone.style.background = '';
+        });
+      });
+      modalUploadZone?.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        if (dt && dt.files && dt.files[0]) {
+          handleModalFile(dt.files[0]);
         }
+      });
 
+      modalFileInput?.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) handleModalFile(file);
         e.target.value = '';
       });
 
@@ -2083,8 +2271,12 @@
           reviewsList
         };
 
-        if (modalImgPreview.src && modalImgPreview.style.display !== 'none') {
-          updatedData.image = modalImgPreview.src;
+        if (modalImgPreview.src && modalImgPreview.style.display !== 'none' && modalImgPreview.src !== window.location.href) {
+          if (modalImgPreview.src.startsWith('blob:') && modalImgPreview.dataset.fallback) {
+            updatedData.image = modalImgPreview.dataset.fallback;
+          } else {
+            updatedData.image = modalImgPreview.src;
+          }
         }
 
         currentProducts[activeEditingId] = {
