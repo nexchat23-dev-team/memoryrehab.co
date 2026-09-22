@@ -388,29 +388,7 @@
 }
 
 .wishlist-count-badge {
-  display: grid;
-  place-items: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 5px;
-  border-radius: var(--radius-full);
-  background: var(--primary-soft);
-  color: var(--primary);
-  border: 1px solid var(--glass-border-subtle);
-  font-size: 0.72rem;
-  font-weight: 800;
-  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-[data-theme="dark"] .wishlist-count-badge,
-.dark-mode .wishlist-count-badge {
-  background: rgba(244, 139, 179, 0.2);
-  color: #fca5a5;
-  border-color: rgba(244, 139, 179, 0.3);
-}
-
-.wishlist-count-badge.bump {
-  transform: scale(1.35);
+  display: none !important;
 }
 
 /* ==========================================================================

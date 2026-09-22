@@ -3,7 +3,7 @@
    ========================================================================== */
 
 .products-section {
-  padding: 60px 0 80px;
+  padding: var(--section-spacing-y, clamp(64px, 7vw, 96px)) 0;
   position: relative;
 }
 
@@ -23,10 +23,11 @@
 }
 
 .section-title-group h2 {
-  font-size: clamp(2rem, 3.2vw, 2.8rem);
+  font-size: clamp(2.4rem, 3.8vw, 3.2rem);
   font-weight: 800;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.04em;
   color: var(--text-main);
+  line-height: 1.15;
   margin-top: 6px;
 }
 
@@ -686,7 +687,7 @@
    ========================================================================== */
 
 .bundle-builder-section {
-  padding: 50px 0 80px;
+  padding: var(--section-spacing-y, clamp(64px, 7vw, 96px)) 0;
   position: relative;
 }
 
@@ -725,10 +726,11 @@
 }
 
 .bundle-title-wrap h2 {
-  font-size: clamp(1.8rem, 2.8vw, 2.5rem);
+  font-size: clamp(2.4rem, 3.8vw, 3.2rem);
   font-weight: 800;
   letter-spacing: -0.04em;
   color: var(--text-main);
+  line-height: 1.15;
   margin-top: 6px;
 }
 

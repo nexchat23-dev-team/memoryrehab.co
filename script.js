@@ -645,10 +645,7 @@ function updateWishlistBadges() {
   const totalCount = wishlist.length;
   const badgeElements = document.querySelectorAll('.wishlist-count-badge, #wishlistCount, #drawerWishlistCount, #mobWishlistCount');
   badgeElements.forEach((el) => {
-    el.textContent = totalCount;
-    el.classList.remove('bump');
-    void el.offsetWidth;
-    el.classList.add('bump');
+    el.style.display = 'none';
   });
 }
 
@@ -2256,10 +2253,13 @@ document.addEventListener('DOMContentLoaded', () => {
         pdpDiscountPill.style.display = 'none';
       }
     }
-    const pdpSize = document.getElementById('pdpSize');
-    if (pdpSize) pdpSize.textContent = prod.size;
-    const pdpSummary = document.getElementById('pdpSummary');
+    const pdpSummary = document.getElementById('pdpSummary') || document.getElementById('pdpDescription');
     if (pdpSummary) pdpSummary.textContent = prod.summary;
+
+    const pdpReviewBigScore = document.getElementById('pdpReviewBigScore');
+    if (pdpReviewBigScore) pdpReviewBigScore.textContent = prod.rating || '4.9';
+    const pdpReviewCountText = document.getElementById('pdpReviewCountText');
+    if (pdpReviewCountText) pdpReviewCountText.textContent = `Based on ${prod.reviews || 0} reviews`;
 
     // Ingredients chips
     const pdpIngredientChips = document.getElementById('pdpIngredientChips');
@@ -2734,8 +2734,10 @@ function initRitualVideoPlayer() {
     });
   }
 
-  // Mobile autoplay assurance
+  // Mobile autoplay assurance & complete muting
+  video.defaultMuted = true;
   video.muted = true;
+  video.volume = 0;
   const playPromise = video.play();
   if (playPromise !== undefined) {
     playPromise.catch(() => {

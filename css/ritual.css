@@ -2,7 +2,7 @@
    BARRIER GLOW RITUAL VIDEO SHOWCASE (Optimized for Low-End Devices)
    ========================================================================== */
 .ritual-video-section {
-  padding: 40px 0 20px;
+  padding: var(--section-spacing-y, clamp(64px, 7vw, 96px)) 0;
 }
 
 .ritual-video-card {
@@ -75,25 +75,28 @@
 
 .ritual-video-grid {
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 32px;
+  grid-template-columns: minmax(280px, 360px) 1fr;
+  gap: 40px;
   align-items: center;
 }
 
 @media (max-width: 900px) {
   .ritual-video-grid {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 28px;
   }
 }
 
 .ritual-player-wrap {
   position: relative;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   overflow: hidden;
   background: #000;
-  aspect-ratio: 16 / 9;
-  box-shadow: var(--shadow-md);
+  aspect-ratio: 9 / 16;
+  max-width: 360px;
+  width: 100%;
+  margin: 0 auto;
+  box-shadow: var(--shadow-lg), 0 10px 40px rgba(0, 0, 0, 0.35);
   border: 1px solid var(--glass-border);
 }
 
@@ -211,7 +214,7 @@
 }
 
 .ritual-title {
-  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-size: clamp(2.4rem, 3.8vw, 3.2rem);
   font-weight: 900;
   color: var(--text-main);
   line-height: 1.15;

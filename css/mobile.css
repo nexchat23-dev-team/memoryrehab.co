@@ -942,14 +942,14 @@ html, body {
    -------------------------------------------------------------------------- */
 @media (max-width: 900px) {
   .products-section {
-    padding-top: 20px !important;
-    padding-bottom: 32px !important;
+    padding: var(--section-spacing-y-mobile, 48px) 0 !important;
   }
   .section-head-wrap {
-    margin-bottom: 16px !important;
+    margin-bottom: 20px !important;
   }
   .section-header-top h2 {
-    font-size: 1.5rem !important;
+    font-size: clamp(1.75rem, 6.5vw, 2.35rem) !important;
+    line-height: 1.15 !important;
   }
   .section-header-top p {
     font-size: 0.85rem !important;
@@ -1040,7 +1040,7 @@ html, body {
    -------------------------------------------------------------------------- */
 @media (max-width: 900px) {
   .ritual-video-section {
-    padding: 16px 0 24px !important;
+    padding: var(--section-spacing-y-mobile, 48px) 0 !important;
   }
   .ritual-video-card {
     padding: 16px !important;
@@ -1057,7 +1057,8 @@ html, body {
     gap: 20px !important;
   }
   .ritual-title {
-    font-size: 1.5rem !important;
+    font-size: clamp(1.75rem, 6.5vw, 2.35rem) !important;
+    line-height: 1.15 !important;
   }
   .ritual-desc {
     font-size: 0.85rem !important;
@@ -1095,7 +1096,7 @@ html, body {
    -------------------------------------------------------------------------- */
 @media (max-width: 900px) {
   .bundle-builder-section {
-    padding: 16px 0 24px !important;
+    padding: var(--section-spacing-y-mobile, 48px) 0 !important;
   }
   .bundle-glass-panel {
     padding: 18px 14px !important;
@@ -1107,7 +1108,8 @@ html, body {
     gap: 8px;
   }
   .bundle-title-wrap h2 {
-    font-size: 1.2rem !important;
+    font-size: clamp(1.75rem, 6.5vw, 2.35rem) !important;
+    line-height: 1.15 !important;
   }
   .bundle-title-wrap p {
     font-size: 0.82rem !important;
@@ -1243,7 +1245,7 @@ html, body {
    -------------------------------------------------------------------------- */
 @media (max-width: 900px) {
   .gallery-section {
-    padding: 16px 0 24px !important;
+    padding: var(--section-spacing-y-mobile, 48px) 0 !important;
   }
   .gallery-interactive-grid {
     grid-template-columns: repeat(2, 1fr) !important;
@@ -1259,6 +1261,31 @@ html, body {
   .gallery-tile-btn {
     font-size: 0.68rem !important;
     padding: 5px 10px !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   BEFORE & AFTER SECTION — Mobile
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .before-after-section {
+    padding: var(--section-spacing-y-mobile, 48px) 0 !important;
+  }
+  .ba-header h2 {
+    font-size: clamp(1.75rem, 6.5vw, 2.35rem) !important;
+    line-height: 1.15 !important;
+  }
+  .ba-badge-label {
+    top: auto !important;
+    bottom: 12px !important;
+    font-size: 0.62rem !important;
+    padding: 4px 10px !important;
+  }
+  .ba-badge-before {
+    left: 10px !important;
+  }
+  .ba-badge-after {
+    right: 10px !important;
   }
 }
 
@@ -1304,8 +1331,9 @@ html, body {
 }
 @media (max-width: 600px) {
   h2 {
-    font-size: clamp(1.2rem, 6vw, 1.6rem) !important;
-    letter-spacing: -0.02em;
+    font-size: clamp(1.65rem, 6.5vw, 2.2rem) !important;
+    letter-spacing: -0.025em;
+    line-height: 1.15 !important;
   }
 }
 
