@@ -328,383 +328,47 @@
   }
 
   /* ============================================================
-     3. SUBTLE 3D MICRO-PHYSICS & DEPTH ENGINE (LUXURY CLINICAL)
-     Physics-based LERP interpolation (60fps) with multi-plane Z-depth.
-     Designed for refined, understated tactile interaction (non-distracting).
-
-     LOW-END DEVICE SAFEGUARDS:
-     - Touch-only / coarse-pointer devices → skip entirely
-     - prefers-reduced-motion → skip entirely
-     - ≤ 2 CPU cores (navigator.hardwareConcurrency) → skip
-     - ≤ 2 GB device memory (navigator.deviceMemory) → skip
-     - Slow network (2g / slow-2g / Save-Data) → skip (proxy for budget device)
-     - Battery saver mode (charging false + level ≤ 15%) → skip
-     - Runtime FPS canary: 500ms probe; if < 30fps → kill all 3D
+     3. 3D CARD PERSPECTIVE TILT & RADIAL SPOTLIGHT
+     Buttery 60fps card tilt with hardware-accelerated transforms
      ============================================================ */
-
-  // Shared flag so the FPS canary can disable 3D globally at runtime
-  var _3dEngineActive = false;
-
-  function isLowEndDevice() {
-    // CPU cores (most budget phones and old laptops report 2 or fewer)
-    if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) return true;
-
-    // Device memory (Chrome/Edge expose this; ≤ 2 GB = budget tier)
-    if (navigator.deviceMemory && navigator.deviceMemory <= 2) return true;
-
-    // Network quality proxy: slow connection ≈ budget device
-    var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    if (conn) {
-      if (conn.saveData) return true;
-      var ect = conn.effectiveType;
-      if (ect === 'slow-2g' || ect === '2g') return true;
-    }
-
-    return false;
-  }
-
-  function initSubtle3DEngine() {
-    // --- Hard gate: touch-only, reduced motion, or detected low-end ---
-    if (window.matchMedia('(hover: none) or (pointer: coarse)').matches) {
-      return; // Disable cursor-tracking 3D physics on touch devices to conserve battery
-    }
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return; // Respect accessibility preferences
-    }
-    if (isLowEndDevice()) {
-      return; // Skip on budget hardware — preserves smooth scrolling & battery
-    }
-
-    // --- Battery saver async check (non-blocking) ---
-    if (navigator.getBattery) {
-      navigator.getBattery().then(function (batt) {
-        if (!batt.charging && batt.level <= 0.15) {
-          // User is on low battery and not charging — kill 3D to save power
-          _3dEngineActive = false;
-          document.documentElement.classList.add('mr-3d-disabled');
-        }
-      }).catch(function () { /* getBattery not supported — continue */ });
-    }
-
-    // Mark active before the FPS canary can potentially disable
-    _3dEngineActive = true;
-
-    // 1. Subtle 3D Multi-Plane Card Tilt
-    init3DCardTilt();
-
-    // 2. Product Detail Bottle Inspection (PDP & Quick-View Modal)
-    init3DBottleInspection();
-
-    // 3. Hero Subtle Depth Parallax
-    initHero3DParallax();
-
-    // 4. Runtime FPS canary — measure real performance for 500ms
-    //    If the device can't hold ≥ 30fps, strip all 3D to prevent jank
-    runFPSCanary();
-  }
-
-  function runFPSCanary() {
-    var frames = 0;
-    var start = performance.now();
-    var canaryId;
-
-    function tick() {
-      frames++;
-      var elapsed = performance.now() - start;
-      if (elapsed < 500) {
-        canaryId = requestAnimationFrame(tick);
-        return;
-      }
-      // Elapsed >= 500ms — evaluate
-      var fps = (frames / elapsed) * 1000;
-      if (fps < 30) {
-        // Device is struggling — disable all 3D physics
-        _3dEngineActive = false;
-        document.documentElement.classList.add('mr-3d-disabled');
-        // Reset any inline transforms the engine may have already set
-        var affected = document.querySelectorAll('.product-card, .bundle-step-card, .ba-metric-card, .hero-glass-card, .pdp-main-img-box, .modal-image-wrap');
-        for (var i = 0; i < affected.length; i++) {
-          affected[i].style.transform = '';
-          affected[i].style.willChange = '';
-        }
-      }
-    }
-    canaryId = requestAnimationFrame(tick);
-  }
-
   function init3DCardTilt() {
-    const cardSelector = '.product-card, .bundle-step-card, .ba-metric-card, .hero-glass-card';
+    if (window.matchMedia('(hover: none) or (pointer: coarse)').matches) {
+      return; // Disable on touch devices to conserve battery
+    }
 
-    function bindCard(card) {
-      if (card._has3DTilt) return;
-      card._has3DTilt = true;
+    const cards = document.querySelectorAll('.product-card, .hero-glass-card, .bundle-step-card');
 
-      let isHovered = false;
-      let targetRotX = 0;
-      let targetRotY = 0;
-      let currentRotX = 0;
-      let currentRotY = 0;
-      let currentTransY = 0;
-      let targetTransY = 0;
-      let rafId = null;
+    cards.forEach(function (card) {
+      let isHovering = false;
 
-      // Maximum subtle angles (kept strictly between 3.5deg and 4.5deg for understated luxury)
-      const MAX_ROT_X = 4.0;
-      const MAX_ROT_Y = 4.5;
-      const HOVER_LIFT_Y = -4.0;
+      card.addEventListener('mouseenter', function () {
+        isHovering = true;
+        card.style.transition = 'transform 0.15s ease-out, box-shadow 0.25s ease';
+      });
 
-      function renderFrame() {
-        // Kill-switch: FPS canary or battery saver disabled the engine
-        if (!_3dEngineActive) {
-          card.style.transform = '';
-          card.style.willChange = '';
-          rafId = null;
-          return;
-        }
-        if (!isHovered && Math.abs(currentRotX) < 0.05 && Math.abs(currentRotY) < 0.05 && Math.abs(currentTransY) < 0.05) {
-          // Card returned to resting orientation
-          card.style.transform = '';
-          card.style.willChange = '';
-          rafId = null;
-          return;
-        }
-
-        // Smooth physics-based lerp (damping factor 0.12)
-        currentRotX += (targetRotX - currentRotX) * 0.12;
-        currentRotY += (targetRotY - currentRotY) * 0.12;
-        currentTransY += (targetTransY - currentTransY) * 0.12;
-
-        card.style.transform = `perspective(1000px) translateY(${currentTransY.toFixed(2)}px) rotateX(${currentRotX.toFixed(2)}deg) rotateY(${currentRotY.toFixed(2)}deg)`;
-
-        rafId = requestAnimationFrame(renderFrame);
-      }
-
-      function onMouseEnter() {
-        isHovered = true;
-        targetTransY = HOVER_LIFT_Y;
-        card.style.willChange = 'transform';
-        if (!rafId) {
-          rafId = requestAnimationFrame(renderFrame);
-        }
-      }
-
-      function onMouseMove(e) {
-        if (!isHovered) return;
+      card.addEventListener('mousemove', function (e) {
+        if (!isHovering) return;
         const rect = card.getBoundingClientRect();
-        if (!rect.width || !rect.height) return;
-
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
 
-        targetRotX = ((y - centerY) / centerY) * -MAX_ROT_X;
-        targetRotY = ((x - centerX) / centerX) * MAX_ROT_Y;
+        const rotateX = ((y - centerY) / centerY) * -6; // Max 6 deg
+        const rotateY = ((x - centerX) / centerX) * 6;  // Max 6 deg
 
-        card.style.setProperty('--mouse-x', x.toFixed(1) + 'px');
-        card.style.setProperty('--mouse-y', y.toFixed(1) + 'px');
-      }
+        card.style.setProperty('--mouse-x', x + 'px');
+        card.style.setProperty('--mouse-y', y + 'px');
 
-      function onMouseLeave() {
-        isHovered = false;
-        targetRotX = 0;
-        targetRotY = 0;
-        targetTransY = 0;
-        if (!rafId) {
-          rafId = requestAnimationFrame(renderFrame);
-        }
-      }
+        card.style.transform = `perspective(900px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-4px)`;
+      });
 
-      card.addEventListener('mouseenter', onMouseEnter, { passive: true });
-      card.addEventListener('mousemove', onMouseMove, { passive: true });
-      card.addEventListener('mouseleave', onMouseLeave, { passive: true });
-    }
-
-    // Bind all initial cards
-    document.querySelectorAll(cardSelector).forEach(bindCard);
-
-    // Watch for dynamically added / updated cards (e.g. routine filter clicks or wishlist)
-    const observer = new MutationObserver(function (mutations) {
-      for (let i = 0; i < mutations.length; i++) {
-        const addedNodes = mutations[i].addedNodes;
-        for (let j = 0; j < addedNodes.length; j++) {
-          const node = addedNodes[j];
-          if (node.nodeType === 1) {
-            if (node.matches && node.matches(cardSelector)) {
-              bindCard(node);
-            }
-            if (node.querySelectorAll) {
-              node.querySelectorAll(cardSelector).forEach(bindCard);
-            }
-          }
-        }
-      }
+      card.addEventListener('mouseleave', function () {
+        isHovering = false;
+        card.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease';
+        card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) translateY(0)';
+      });
     });
-
-    const catalogGrid = document.getElementById('productCardsGrid');
-    if (catalogGrid) {
-      observer.observe(catalogGrid, { childList: true, subtree: true });
-    }
-  }
-
-  /* ============================================================
-     BOTTLE & SPECIMEN 3D INSPECTION PHYSICS (PDP & QUICK VIEW)
-     Micro-rotation with dynamic optical specular reflection.
-     Simulates holding and turning an apothecary glass vial in light.
-     ============================================================ */
-  function init3DBottleInspection() {
-    const targets = document.querySelectorAll('.pdp-main-img-box, .modal-image-wrap');
-    if (!targets.length) return;
-
-    targets.forEach(function (box) {
-      if (box._hasBottle3D) return;
-      box._hasBottle3D = true;
-
-      const img = box.querySelector('img');
-      if (!img) return;
-
-      let isHovered = false;
-      let targetRotX = 0;
-      let targetRotY = 0;
-      let currentRotX = 0;
-      let currentRotY = 0;
-      let rafId = null;
-
-      const MAX_TILT_X = 3.5;
-      const MAX_TILT_Y = 4.0;
-
-      function renderBottleFrame() {
-        if (!_3dEngineActive) {
-          box.style.transform = '';
-          if (img) img.style.transform = '';
-          rafId = null;
-          return;
-        }
-        if (!isHovered && Math.abs(currentRotX) < 0.05 && Math.abs(currentRotY) < 0.05) {
-          box.style.transform = '';
-          if (img) img.style.transform = '';
-          rafId = null;
-          return;
-        }
-
-        currentRotX += (targetRotX - currentRotX) * 0.1;
-        currentRotY += (targetRotY - currentRotY) * 0.1;
-
-        box.style.transform = `perspective(1000px) rotateX(${currentRotX.toFixed(2)}deg) rotateY(${currentRotY.toFixed(2)}deg)`;
-        if (img) {
-          img.style.transform = `scale(1.03) translateZ(10px)`;
-        }
-
-        rafId = requestAnimationFrame(renderBottleFrame);
-      }
-
-      box.addEventListener('mouseenter', function () {
-        isHovered = true;
-        if (!rafId) rafId = requestAnimationFrame(renderBottleFrame);
-      }, { passive: true });
-
-      box.addEventListener('mousemove', function (e) {
-        if (!isHovered) return;
-        const rect = box.getBoundingClientRect();
-        if (!rect.width || !rect.height) return;
-
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-
-        targetRotX = ((y - centerY) / centerY) * -MAX_TILT_X;
-        targetRotY = ((x - centerX) / centerX) * MAX_TILT_Y;
-
-        // Specular optical light position (from 15% to 85%)
-        const glarePos = 15 + ((x / rect.width) * 70);
-        box.style.setProperty('--glare-pos', glarePos.toFixed(1) + '%');
-      }, { passive: true });
-
-      box.addEventListener('mouseleave', function () {
-        isHovered = false;
-        targetRotX = 0;
-        targetRotY = 0;
-        if (!rafId) rafId = requestAnimationFrame(renderBottleFrame);
-      }, { passive: true });
-    });
-  }
-
-  /* ============================================================
-     HERO SUBTLE 3D DEPTH PARALLAX
-     Understated perspective shift between foreground badges and background.
-     ============================================================ */
-  function initHero3DParallax() {
-    const heroSection = document.getElementById('hero') || document.querySelector('.hero-fullbleed-wrapper');
-    if (!heroSection) return;
-
-    const banner = heroSection.querySelector('.hero-banner-expanded');
-    const badge = heroSection.querySelector('.hero-floating-step-badge');
-    const statsBar = heroSection.querySelector('.hero-takeover-stats-bar');
-
-    if (!banner && !statsBar) return;
-
-    let targetX = 0;
-    let targetY = 0;
-    let currentX = 0;
-    let currentY = 0;
-    let rafId = null;
-    let isTracking = false;
-
-    function renderHeroFrame() {
-      if (!_3dEngineActive) {
-        if (banner) banner.style.transform = '';
-        if (badge) badge.style.transform = '';
-        rafId = null;
-        return;
-      }
-      if (!isTracking && Math.abs(currentX) < 0.02 && Math.abs(currentY) < 0.02) {
-        if (banner) banner.style.transform = '';
-        if (badge) badge.style.transform = '';
-        rafId = null;
-        return;
-      }
-
-      currentX += (targetX - currentX) * 0.08;
-      currentY += (targetY - currentY) * 0.08;
-
-      if (banner) {
-        // Ultra-subtle tilt: max 1.2deg
-        banner.style.transform = `perspective(1200px) rotateX(${(-currentY * 1.2).toFixed(2)}deg) rotateY(${(currentX * 1.5).toFixed(2)}deg)`;
-      }
-
-      if (badge) {
-        // Floating badge shifts slightly opposite for authentic parallax depth
-        badge.style.transform = `translate3d(${(currentX * 6).toFixed(1)}px, ${(currentY * 5).toFixed(1)}px, 8px)`;
-      }
-
-      rafId = requestAnimationFrame(renderHeroFrame);
-    }
-
-    heroSection.addEventListener('mouseenter', function () {
-      isTracking = true;
-      if (!rafId) rafId = requestAnimationFrame(renderHeroFrame);
-    }, { passive: true });
-
-    heroSection.addEventListener('mousemove', function (e) {
-      if (!isTracking) return;
-      const rect = heroSection.getBoundingClientRect();
-      if (!rect.width || !rect.height) return;
-
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = (e.clientY - rect.top) / rect.height;
-
-      // Normalize from -1 to 1
-      targetX = (x - 0.5) * 2;
-      targetY = (y - 0.5) * 2;
-    }, { passive: true });
-
-    heroSection.addEventListener('mouseleave', function () {
-      isTracking = false;
-      targetX = 0;
-      targetY = 0;
-      if (!rafId) rafId = requestAnimationFrame(renderHeroFrame);
-    }, { passive: true });
   }
 
   /* ============================================================
@@ -1538,7 +1202,7 @@
   function initAll() {
     SoundFX.init();
     initReadingProgress();
-    initSubtle3DEngine();
+    init3DCardTilt();
     initBeforeAfterSlider();
     initSkinQuiz();
     initSocialProof();
@@ -1559,9 +1223,7 @@
       triggerMegaConfetti: () => triggerConfetti({ heavy: true }),
       initHoloFoil: initHoloFoil,
       initClinicalTextureLoupe: initClinicalTextureLoupe,
-      initDevInspectorHUD: initDevInspectorHUD,
-      initSubtle3DEngine: initSubtle3DEngine,
-      init3DCardTilt: init3DCardTilt
+      initDevInspectorHUD: initDevInspectorHUD
     };
   }
 
