@@ -474,45 +474,30 @@ function initAutoThemeScheduler(config) {
   }, intervalMs);
 }
 
-// ── Paystack Redirect Checkout Helper (client-side) ──
-async function initiatePaystackRedirect(amount, email) {
-  try {
-    const resp = await fetch('/api/payments/initiate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount, email })
-    });
-    const data = await resp.json();
-    if (!resp.ok || !data || !data.data || !data.data.authorization_url) {
-      console.warn('Paystack init failed', data);
-      alert('Payment initialization failed. Please try again.');
-      return;
-    }
-    // Redirect customer to Paystack payment page
-    window.location.href = data.data.authorization_url;
-  } catch (err) {
-    console.warn('Checkout error:', err);
-    alert('Payment failed to start. Check your network and try again.');
-  }
-}
-
-// Read payment status after redirect and show a basic message
+// ── Paystack Redirect Verification Handler ──
 function checkPaystackRedirect() {
   const params = new URLSearchParams(window.location.search);
   const status = params.get('payment');
   const reference = params.get('reference');
   if (!status) return;
   if (status === 'success') {
-    alert('Payment successful! Reference: ' + (reference || '—'));
-    // Optionally remove query params
+    if (typeof showToast === 'function') {
+      showToast('Payment successful! Order verified.', '✓');
+    }
+    if (typeof triggerMegaConfetti === 'function') {
+      triggerMegaConfetti();
+    } else if (typeof triggerConfetti === 'function') {
+      triggerConfetti();
+    }
     history.replaceState({}, document.title, window.location.pathname);
   } else if (status === 'failed') {
-    alert('Payment failed or was cancelled.');
+    if (typeof showToast === 'function') {
+      showToast('Payment was cancelled or unsuccessful.', '✕');
+    }
     history.replaceState({}, document.title, window.location.pathname);
   }
 }
 
-// Run on load to catch Paystack redirect
 window.addEventListener('load', checkPaystackRedirect);
 
 /**
@@ -2555,129 +2540,6 @@ document.addEventListener('DOMContentLoaded', () => {
   renderCart();
 });
 
-// -----------------------------
-// Debug overlay & OCR lazy-load
-// -----------------------------
-
-// Small debug console used to capture runtime errors and developer messages
-window.__mr_debug = {
-  enabled: false,
-  show(msg, level = 'log') {
-    // Disabled in production to prevent mobile overlay intrusions
-    return;
-  }
-};
-
-// Hook window errors and promise rejections
-window.addEventListener('error', (ev) => {
-  try { window.__mr_debug.show(ev.message + ' — ' + (ev.filename || '' ) + ':' + (ev.lineno||''), 'error'); } catch(e){}
-});
-
-window.addEventListener('unhandledrejection', (ev) => {
-  try { window.__mr_debug.show('Unhandled Rejection: ' + (ev.reason && ev.reason.stack ? ev.reason.stack : ev.reason), 'error'); } catch(e){}
-});
-
-// Wrap console.error to also show overlay
-(function(){
-  const origErr = console.error.bind(console);
-  console.error = function(...args){
-    try { window.__mr_debug.show(args.map(a=> (typeof a === 'string'? a : JSON.stringify(a))).join(' '), 'error'); } catch(e){}
-    origErr(...args);
-  };
-})();
-
-// Debug overlay controls
-document.addEventListener('click', (e) => {
-  if (e.target && e.target.id === 'debugCloseBtn') {
-    const overlay = document.getElementById('debugOverlay'); if (overlay) overlay.style.display='none';
-  }
-  if (e.target && e.target.id === 'debugClearBtn') {
-    const msgs = document.getElementById('debugMessages'); if (msgs) msgs.innerHTML = '';
-  }
-});
-
-// OCR lazy loader and scanner
-async function loadTesseractLocal() {
-  if (window.Tesseract && window.Tesseract.createWorker) return window.Tesseract;
-  // prefer local copy under ./libs/
-  const localPath = './libs/tesseract.min.js';
-  try {
-    const r = await fetch(localPath, { method: 'HEAD' });
-    if (r.ok) {
-      await new Promise((res, rej) => {
-        const s = document.createElement('script');
-        s.src = localPath;
-        s.onload = res; s.onerror = rej; document.body.appendChild(s);
-      });
-      window.__mr_debug.show('Tesseract loaded from local libs', 'info');
-      return window.Tesseract;
-    }
-  } catch (e) {
-    window.__mr_debug.show('Local Tesseract not found: ' + e.message, 'warn');
-  }
-
-  // Fallback: attempt to load from CDN (may be blocked offline)
-  const cdn = 'https://unpkg.com/tesseract.js@v2.1.5/dist/tesseract.min.js';
-  try {
-    await new Promise((res, rej) => {
-      const s = document.createElement('script');
-      s.src = cdn; s.onload = res; s.onerror = rej; document.body.appendChild(s);
-    });
-    window.__mr_debug.show('Tesseract loaded from CDN', 'info');
-    return window.Tesseract;
-  } catch (e) {
-    window.__mr_debug.show('Failed to load Tesseract from CDN: ' + e.message, 'error');
-    throw new Error('Tesseract not available');
-  }
-}
-
-async function scanImagesWithOCR(limit = 8) {
-  try {
-    const T = await loadTesseractLocal();
-    if (!T || !T.createWorker) throw new Error('Tesseract worker API missing');
-
-    const worker = T.createWorker({
-      corePath: './libs/tesseract-core.wasm.js',
-      workerPath: './libs/worker.min.js',
-      langPath: './libs/lang',
-      gzip: false
-    });
-
-    await worker.load();
-    await worker.loadLanguage('eng');
-    await worker.initialize('eng');
-
-    const imgs = Array.from(document.querySelectorAll('.product-card img, .gallery-tile img')).slice(0, limit);
-    for (const img of imgs) {
-      try {
-        const src = img.src || img.getAttribute('data-src');
-        if (!src) continue;
-        window.__mr_debug.show('OCR: scanning ' + src, 'info');
-        const { data } = await worker.recognize(src);
-        const text = (data && data.text) ? data.text.trim() : '';
-        window.__mr_debug.show('OCR result: ' + text.split('\n').slice(0,2).join(' | '), 'info');
-        const candidate = text.split('\n').map(s=>s.trim()).filter(Boolean)[0];
-        if (candidate && candidate.length > 3) {
-          const card = img.closest('.product-card') || img.closest('.gallery-tile');
-          if (card) {
-            card.dataset.name = candidate;
-            const titleEl = card.querySelector('.card-title');
-            if (titleEl) titleEl.textContent = candidate;
-          }
-        }
-      } catch (ocrErr) {
-        window.__mr_debug.show('OCR item failed: ' + (ocrErr.message||ocrErr), 'warn');
-      }
-    }
-
-    await worker.terminate();
-    window.__mr_debug.show('OCR scan complete', 'info');
-  } catch (err) {
-    window.__mr_debug.show('OCR setup failed: ' + (err.message||err), 'error');
-  }
-}
-
-// Wire Scan Images button
 document.addEventListener('DOMContentLoaded', () => {
   // Detect Android user agents and add a body class so styles can be scoped
   try {
@@ -3202,10 +3064,10 @@ function initMaintenanceMode(settings) {
     if (!key) return;
     if (key.trim() === bypassKey) {
       sessionStorage.setItem('mr_maintenance_bypass', 'true');
-      alert('✓ Staff passkey verified! Entering preview mode.');
-      window.location.reload();
+      showToast('Staff passkey verified. Entering preview mode...', '✓');
+      setTimeout(() => window.location.reload(), 650);
     } else {
-      alert('❌ Invalid passkey. Access denied.');
+      showToast('Invalid passkey. Access denied.', '✕');
     }
   });
 }

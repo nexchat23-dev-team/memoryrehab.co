@@ -176,27 +176,3 @@ input {
   100% { transform: translate3d(-16px, 28px, 0); }
 }
 
-/* Debug overlay styling */
-.debug-overlay {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  width: min(360px, calc(100vw - 36px));
-  max-width: 100%;
-  box-sizing: border-box;
-  max-height: 48vh;
-  background: rgba(12,12,14,0.9);
-  color: #fff;
-  border-radius: 12px;
-  z-index: 99999;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  font-size: 0.85rem;
-}
-.debug-header { display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:rgba(255,255,255,0.03); font-weight:700; }
-.debug-messages { padding:10px; overflow:auto; flex:1; max-height:40vh; }
-.debug-messages .debug-line { margin-bottom:8px; border-left:3px solid rgba(255,255,255,0.06); padding-left:8px; }
-.debug-actions { padding:8px; display:flex; gap:8px; justify-content:flex-end; background:rgba(255,255,255,0.02); }
-

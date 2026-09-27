@@ -236,14 +236,6 @@
     max-width: 100%;
   }
 
-  /* Debug overlay */
-  .debug-overlay {
-    right: 8px;
-    left: 8px;
-    width: auto;
-    max-width: 100%;
-  }
-
   /* Trust grid */
   .trust-grid {
     grid-template-columns: 1fr;
