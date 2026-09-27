@@ -254,8 +254,7 @@ html {
     width: 16px !important;
     height: 16px !important;
   }
-  .user-auth-pill,
-  #scanImagesBtn {
+  .user-auth-pill {
     display: none !important;
   }
   /* Admin portal header override */

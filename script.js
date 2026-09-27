@@ -2688,15 +2688,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   } catch (e) { /* ignore */ }
 
-  const scanBtn = document.getElementById('scanImagesBtn');
-  if (scanBtn) {
-    scanBtn.addEventListener('click', () => {
-      if ('requestIdleCallback' in window) requestIdleCallback(() => scanImagesWithOCR(10), { timeout: 4000 });
-      else setTimeout(() => scanImagesWithOCR(10), 600);
-      window.__mr_debug.show('Scheduled OCR scan', 'info');
-    });
-  }
-
   // Initialize Storefront Dynamic Catalog Hydration
   hydrateStorefrontCatalog();
 

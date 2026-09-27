@@ -340,11 +340,6 @@
     flex-shrink: 0;
   }
 
-  /* Hide Scan button on mobile — too cluttered */
-  #scanImagesBtn {
-    display: none !important;
-  }
-
   /* Compact the cart button on mobile */
   .cart-toggle-btn {
     padding: 6px 10px;
@@ -759,11 +754,6 @@ html, body {
     overflow: visible;
     flex-wrap: nowrap;
     min-width: 0;
-  }
-
-  /* Scan button hidden on mobile — it's a desktop utility */
-  #scanImagesBtn {
-    display: none !important;
   }
 
   /* Cart "Cart" label hidden — icon + badge only */
