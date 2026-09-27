@@ -59,41 +59,272 @@
   justify-content: center;
 }
 
-/* 3. 3D CARD PERSPECTIVE TILT & DYNAMIC RADIAL SPOTLIGHT */
+/* ==========================================================================
+   3. SUBTLE 3D MICRO-PHYSICS & DEPTH ENGINE (LUXURY CLINICAL)
+   Understated tactile perspective, multi-plane depth & specular light glint.
+   Capped micro-angles (3.5°–4.5°) for authentic luxury apothecary aesthetics.
+   ========================================================================== */
+
 .product-card,
 .hero-glass-card,
 .bundle-step-card,
-.ritual-card {
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease !important;
-  transform-style: preserve-3d;
+.ritual-card,
+.ba-metric-card {
   position: relative;
-  overflow: hidden;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  will-change: transform;
+}
+
+/* Base resting transition - active when smoothly returning to resting state */
+.product-card,
+.bundle-step-card,
+.ba-metric-card,
+.ritual-card {
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.3s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
+  /* Dynamic radial specular spotlight reacting to pointer angle */
   .product-card::before,
   .hero-glass-card::before,
-  .bundle-step-card::before {
+  .bundle-step-card::before,
+  .ba-metric-card::before {
     content: '';
     position: absolute;
     inset: 0;
     border-radius: inherit;
     background: radial-gradient(
-      450px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-      rgba(16, 185, 129, 0.14),
-      rgba(6, 182, 212, 0.04) 40%,
+      480px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(255, 255, 255, 0.16),
+      rgba(16, 185, 129, 0.06) 35%,
       transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+    z-index: 4;
+  }
+
+  .product-card:hover::before,
+  .hero-glass-card:hover::before,
+  .bundle-step-card:hover::before,
+  .ba-metric-card:hover::before {
+    opacity: 1;
+  }
+
+  /* Internal subtle depth lift on card components */
+  .product-card .card-media-wrap img {
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .product-card:hover .card-media-wrap img {
+    transform: scale(1.035);
+  }
+
+  .product-card .card-badge-row {
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .product-card:hover .card-badge-row {
+    transform: translateY(-2px);
+  }
+
+  .product-card .card-add-cart-btn {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+  }
+  .product-card:hover .card-add-cart-btn {
+    transform: translateY(-1.5px);
+    box-shadow: 0 4px 14px var(--primary-glow);
+  }
+
+  /* Bundle step cards subtle depth */
+  .bundle-step-card {
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+  }
+  .bundle-step-card .bundle-step-img-wrap img {
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .bundle-step-card:hover .bundle-step-img-wrap img {
+    transform: scale(1.04);
+  }
+  .bundle-step-card .bundle-step-tag {
+    transition: transform 0.35s ease;
+  }
+  .bundle-step-card:hover .bundle-step-tag {
+    transform: translateY(-1.5px);
+  }
+
+  /* Clinical Before/After metric cards subtle depth */
+  .ba-metric-card {
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+  }
+  .ba-metric-card:hover {
+    transform: translateY(-3px) perspective(900px) rotateX(1.5deg);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* --- SUBTLE 3D AMBIENT LEVITATION & PARALLAX --- */
+@keyframes subtleAmbient3DFloat {
+  0%, 100% {
+    transform: translateY(0px) rotateX(0deg) rotateY(0deg);
+  }
+  50% {
+    transform: translateY(-3.5px) rotateX(1.5deg) rotateY(-1deg);
+  }
+}
+
+@keyframes subtleAmbient3DFloatAlt {
+  0%, 100% {
+    transform: translateY(0px) rotateX(0deg) rotateY(0deg);
+  }
+  50% {
+    transform: translateY(-3px) rotateX(-1.2deg) rotateY(1.2deg);
+  }
+}
+
+.hero-floating-step-badge {
+  animation: subtleAmbient3DFloat 6.5s ease-in-out infinite;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.hero-editorial-under-block .campaign-eyebrow-row .eyebrow-badge {
+  animation: subtleAmbient3DFloatAlt 7s ease-in-out infinite 0.5s;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.hero-takeover-stats-bar {
+  transform-style: preserve-3d;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.45s ease;
+  will-change: transform;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero-takeover-stats-bar:hover {
+    transform: translateY(-2px) perspective(900px) rotateX(1deg);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  }
+  .hero-takeover-stats-bar .stat-item {
+    transition: transform 0.3s ease;
+  }
+  .hero-takeover-stats-bar:hover .stat-item {
+    transform: translateY(-1px);
+  }
+}
+
+/* --- SUBTLE 3D BOTTLE / SHOWCASE INSPECTION TILT --- */
+.pdp-main-img-box,
+.modal-image-wrap {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  will-change: transform;
+  position: relative;
+  overflow: hidden;
+}
+
+.pdp-main-img-box img,
+.modal-image-wrap img {
+  will-change: transform;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pdp-main-img-box::after,
+  .modal-image-wrap::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      115deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.15) var(--glare-pos, 50%),
+      transparent 80%
     );
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
-    z-index: 2;
+    z-index: 3;
   }
-  .product-card:hover::before,
-  .hero-glass-card:hover::before,
-  .bundle-step-card:hover::before {
+
+  .pdp-main-img-box:hover::after,
+  .modal-image-wrap:hover::after {
     opacity: 1;
   }
+}
+
+/* --- SUBTLE 3D TACTILE BUTTON MICRO-PHYSICS --- */
+.btn-primary,
+.hero-shop-now-cta,
+.bundle-add-all-btn,
+.checkout-action-btn {
+  transform-style: preserve-3d;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, filter 0.2s ease;
+  will-change: transform;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover,
+  .hero-shop-now-cta:hover,
+  .bundle-add-all-btn:hover,
+  .checkout-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px var(--primary-glow, rgba(16, 185, 129, 0.35)),
+                inset 0 1px 1px rgba(255, 255, 255, 0.45);
+  }
+
+  .btn-primary:active,
+  .hero-shop-now-cta:active,
+  .bundle-add-all-btn:active,
+  .checkout-action-btn:active {
+    transform: translateY(1px) scale(0.985);
+    box-shadow: 0 3px 10px var(--primary-glow, rgba(16, 185, 129, 0.25)),
+                inset 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Accessibility: strictly disable 3D animation when reduced motion requested */
+@media (prefers-reduced-motion: reduce) {
+  .product-card,
+  .hero-glass-card,
+  .bundle-step-card,
+  .hero-floating-step-badge,
+  .hero-takeover-stats-bar,
+  .ba-metric-card,
+  .pdp-main-img-box,
+  .modal-image-wrap,
+  .btn-primary,
+  .hero-editorial-under-block .campaign-eyebrow-row .eyebrow-badge {
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Low-end device & battery saver fallback: completely disables 3D & heavy filters */
+html.mr-3d-disabled .product-card,
+html.mr-3d-disabled .hero-glass-card,
+html.mr-3d-disabled .bundle-step-card,
+html.mr-3d-disabled .hero-floating-step-badge,
+html.mr-3d-disabled .hero-takeover-stats-bar,
+html.mr-3d-disabled .ba-metric-card,
+html.mr-3d-disabled .pdp-main-img-box,
+html.mr-3d-disabled .modal-image-wrap,
+html.mr-3d-disabled .btn-primary,
+html.mr-3d-disabled .hero-editorial-under-block .campaign-eyebrow-row .eyebrow-badge {
+  animation: none !important;
+  transform: none !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+html.mr-3d-disabled .product-card::before,
+html.mr-3d-disabled .hero-glass-card::before,
+html.mr-3d-disabled .bundle-step-card::before,
+html.mr-3d-disabled .ba-metric-card::before,
+html.mr-3d-disabled .pdp-main-img-box::after,
+html.mr-3d-disabled .modal-image-wrap::after {
+  display: none !important;
 }
 
 /* 4. CLINICAL BEFORE & AFTER RECOVERY SLIDER */
