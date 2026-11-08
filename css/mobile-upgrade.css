@@ -455,15 +455,17 @@ html {
   }
   .card-footer-row {
     display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
     margin-top: auto !important;
-    gap: 6px;
+    padding-top: 10px !important;
   }
   .price-container {
     display: flex;
-    flex-direction: column;
-    gap: 1px;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
   }
   .current-price {
     font-size: clamp(0.85rem, 3.4vw, 0.96rem) !important;
@@ -475,25 +477,31 @@ html {
     opacity: 0.55;
   }
   .card-add-cart-btn {
-    width: 38px !important;
+    width: 100% !important;
+    min-width: 100% !important;
     height: 38px !important;
-    min-width: 38px !important;
     min-height: 38px !important;
-    padding: 0 !important;
-    border-radius: 50% !important;
-    display: grid !important;
-    place-items: center !important;
+    padding: 8px 12px !important;
+    border-radius: var(--radius-full) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
     flex-shrink: 0 !important;
-    font-size: 0 !important;
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    color: var(--btn-primary-text, #ffffff) !important;
+    white-space: nowrap !important;
     box-shadow: 0 4px 12px var(--primary-glow) !important;
     transition: transform 0.18s ease, box-shadow 0.18s ease !important;
   }
   .card-add-cart-btn:active {
-    transform: scale(0.92) !important;
+    transform: scale(0.96) !important;
   }
   .card-add-cart-btn svg {
-    width: 17px !important;
-    height: 17px !important;
+    width: 14px !important;
+    height: 14px !important;
+    flex-shrink: 0 !important;
   }
   .step-badge, .card-badge {
     font-size: 0.55rem !important;

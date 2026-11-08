@@ -820,7 +820,14 @@ function initWishlistPage() {
               <h3 class="card-title"><a href="product.html?id=${p.id}">${p.name}</a></h3>
               <div class="card-footer-row">
                 <span class="current-price">${formatCurrency(price)}</span>
-                <button class="card-add-cart-btn" type="button" onclick="if(window.addToCart){window.addToCart(window.MEMORY_REHAB_CATALOG['${p.id}']);}">Add</button>
+                <button class="card-add-cart-btn" type="button" onclick="if(window.addToCart){window.addToCart(window.MEMORY_REHAB_CATALOG['${p.id}']);}">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                  </svg>
+                  Add to Cart
+                </button>
               </div>
             </div>
           </article>
@@ -2833,7 +2840,7 @@ function hydrateStorefrontCatalog() {
                   <circle cx="20" cy="21" r="1"></circle>
                   <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                 </svg>
-                Add
+                Add to Cart
               </button>
             </div>
           </div>

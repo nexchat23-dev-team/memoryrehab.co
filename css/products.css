@@ -603,7 +603,7 @@
 .card-add-cart-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   padding: 9px 18px;
   border-radius: var(--radius-full);
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
@@ -613,6 +613,8 @@
   box-shadow: 0 4px 14px var(--primary-glow);
   border: 1px solid var(--btn-primary-border, rgba(255, 255, 255, 0.35));
   transition: var(--transition);
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 [data-theme="dark"] .card-add-cart-btn,
