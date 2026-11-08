@@ -2447,6 +2447,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const db = firebase.firestore();
       try {
+        if (typeof db.settings === 'function') {
+          db.settings({ experimentalForceLongPolling: true, merge: true });
+        }
+      } catch(e) {}
+      try {
         if (typeof db.enablePersistence === 'function') {
           db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
         }
