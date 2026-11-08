@@ -313,11 +313,11 @@ html {
 /* 4B. RITUAL VIDEO & 3-STEP QUICK JUMP BAR RESPONSIVENESS */
 @media (max-width: 900px) {
   .ritual-player-wrap {
-    aspect-ratio: 9 / 16 !important;
+    aspect-ratio: 3 / 4 !important;
     max-width: 320px !important;
     margin: 0 auto !important;
     min-height: auto !important;
-    max-height: 580px !important;
+    max-height: 460px !important;
   }
   .ritual-steps-bar {
     bottom: 8px !important;
@@ -714,4 +714,14 @@ html {
   body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
   * { -webkit-tap-highlight-color: rgba(244, 139, 179, 0.15); tap-highlight-color: rgba(244, 139, 179, 0.15); }
   input, select, textarea { font-size: 16px !important; }
+
+  /* Lift social proof toast above mobile bottom nav */
+  .social-proof-toast {
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: calc(100vw - 24px) !important;
+    padding: 10px 12px !important;
+  }
 }

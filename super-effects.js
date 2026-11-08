@@ -1058,6 +1058,9 @@
      Live 60FPS counter, DOM node telemetry, Wireframe Blueprint mode
      ============================================================ */
   function initDevInspectorHUD() {
+    const isDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.search.includes('debug=1');
+    if (!isDev) return;
+
     let hud = document.getElementById('devInspectorHud');
     let trigger = document.getElementById('devHudTrigger');
 

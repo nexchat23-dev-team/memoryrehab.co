@@ -100,30 +100,45 @@
   gap: 8px;
   font-size: 0.88rem;
   color: var(--text-muted);
+  flex-wrap: wrap;
 }
 
 .pdp-ratings-row .stars {
   color: var(--accent-gold);
+  white-space: nowrap !important;
+  letter-spacing: 1px;
+}
+
+.pdp-ratings-row strong {
+  white-space: nowrap !important;
+  word-break: keep-all !important;
 }
 
 .pdp-price-row {
   display: flex;
   align-items: baseline;
-  gap: 12px;
+  gap: 10px;
   margin: 4px 0;
+  flex-wrap: wrap;
 }
 
 .pdp-price {
-  font-size: 2.2rem;
+  font-size: 2rem;
   font-weight: 900;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   color: var(--text-main);
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  overflow-wrap: normal !important;
 }
 
 .pdp-orig-price {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   color: var(--text-muted);
   text-decoration: line-through;
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  overflow-wrap: normal !important;
 }
 
 .pdp-discount-pill {
@@ -133,6 +148,9 @@
   color: var(--success);
   font-size: 0.75rem;
   font-weight: 800;
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  flex-shrink: 0;
 }
 
 .pdp-summary {
@@ -1068,4 +1086,92 @@
   .face-welcome-content {
     padding: 24px 20px;
   }
+
+  .pdp-shell {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .pdp-buy-box {
+    padding: 20px 18px !important;
+    gap: 12px !important;
+    border-radius: 18px !important;
+    box-shadow: var(--shadow-md) !important;
+    top: 75px;
+  }
+
+  .pdp-title {
+    font-size: 1.45rem !important;
+    line-height: 1.25 !important;
+    letter-spacing: -0.02em !important;
+  }
+
+  .pdp-price-row {
+    gap: 8px !important;
+    align-items: baseline !important;
+    margin: 2px 0 4px !important;
+  }
+
+  .pdp-price {
+    font-size: 1.55rem !important;
+  }
+
+  .pdp-orig-price {
+    font-size: 1rem !important;
+  }
+
+  .pdp-discount-pill {
+    font-size: 0.72rem !important;
+    padding: 3px 8px !important;
+  }
+
+  .pdp-summary {
+    font-size: 0.88rem !important;
+    line-height: 1.48 !important;
+  }
+
+  .pdp-perks-list {
+    font-size: 0.8rem !important;
+    gap: 6px !important;
+  }
 }
+
+@media (max-width: 599px) {
+  .pdp-buy-box {
+    padding: 16px 14px !important;
+    gap: 10px !important;
+    border-radius: 16px !important;
+  }
+
+  .pdp-step-badge {
+    padding: 4px 10px !important;
+    font-size: 0.72rem !important;
+  }
+
+  .pdp-title {
+    font-size: 1.3rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .pdp-ratings-row {
+    font-size: 0.8rem !important;
+    gap: 6px !important;
+  }
+
+  .pdp-price-row {
+    gap: 6px !important;
+  }
+
+  .pdp-price {
+    font-size: 1.4rem !important;
+  }
+
+  .pdp-orig-price {
+    font-size: 0.92rem !important;
+  }
+
+  .pdp-summary {
+    font-size: 0.85rem !important;
+  }
+}
+
