@@ -301,17 +301,41 @@
   font-size: 0.85rem;
   font-weight: 800;
   color: var(--primary);
+  white-space: nowrap !important;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
 }
 
 .ritual-price-tag del {
   color: var(--text-muted);
   font-size: 0.76rem;
   margin-left: 4px;
+  white-space: nowrap !important;
 }
 
 .ritual-product-actions {
   display: flex;
   gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.ritual-product-actions .btn-secondary {
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.ritual-product-actions .card-add-cart-btn,
+.ritual-product-actions .btn-primary {
+  padding: 8px 16px;
+  font-size: 0.82rem;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  width: auto;
+  min-width: unset;
 }
 
 @media (max-width: 900px) {
@@ -328,9 +352,86 @@
     margin-bottom: 6px !important;
     line-height: 1.65 !important;
   }
+}
+
+@media (max-width: 680px) {
   .ritual-product-pill {
+    display: grid !important;
+    grid-template-columns: 48px 1fr !important;
+    grid-template-rows: auto auto !important;
+    gap: 10px 12px !important;
+    padding: 12px 14px !important;
+    align-items: center !important;
     margin-top: 14px !important;
-    padding: 12px 16px !important;
+    box-sizing: border-box !important;
+  }
+  .ritual-product-thumb {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 10px !important;
+  }
+  .ritual-product-info {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+  }
+  .ritual-product-info h4 {
+    font-size: 0.86rem !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    margin: 0 !important;
+  }
+  .ritual-price-tag {
+    font-size: 0.85rem !important;
+    font-weight: 800 !important;
+    color: var(--primary) !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: baseline !important;
+    gap: 6px !important;
+  }
+  .ritual-price-tag del {
+    font-size: 0.74rem !important;
+    color: var(--text-muted) !important;
+    white-space: nowrap !important;
+  }
+  .ritual-product-actions {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: 2px !important;
+  }
+  .ritual-product-actions .btn-secondary {
+    flex: 1 !important;
+    min-height: 36px !important;
+    padding: 6px 12px !important;
+    font-size: 0.78rem !important;
+    text-align: center !important;
+    justify-content: center !important;
+    border-radius: var(--radius-full) !important;
+  }
+  .ritual-product-actions .card-add-cart-btn,
+  .ritual-product-actions .btn-primary {
+    flex: 2 !important;
+    width: auto !important;
+    min-width: unset !important;
+    min-height: 36px !important;
+    padding: 6px 14px !important;
+    font-size: 0.78rem !important;
+    text-align: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    border-radius: var(--radius-full) !important;
   }
 }
 

@@ -416,7 +416,7 @@
     border-top: none;
     margin-top: 4px;
   }
-  .card-add-cart-btn {
+  .product-card .card-add-cart-btn {
     padding: 9px 10px;
     font-size: 0.78rem;
     justify-content: center;
@@ -425,7 +425,7 @@
     border-radius: 10px;
     box-shadow: none;
   }
-  .card-add-cart-btn svg {
+  .product-card .card-add-cart-btn svg {
     width: 14px;
     height: 14px;
   }

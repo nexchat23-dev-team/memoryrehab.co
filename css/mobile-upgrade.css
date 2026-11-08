@@ -476,7 +476,7 @@ html {
     font-size: 0.68rem !important;
     opacity: 0.55;
   }
-  .card-add-cart-btn {
+  .product-card .card-add-cart-btn {
     width: 100% !important;
     min-width: 100% !important;
     height: 38px !important;
@@ -495,13 +495,23 @@ html {
     box-shadow: 0 4px 12px var(--primary-glow) !important;
     transition: transform 0.18s ease, box-shadow 0.18s ease !important;
   }
-  .card-add-cart-btn:active {
+  .product-card .card-add-cart-btn:active {
     transform: scale(0.96) !important;
   }
-  .card-add-cart-btn svg {
+  .product-card .card-add-cart-btn svg {
     width: 14px !important;
     height: 14px !important;
     flex-shrink: 0 !important;
+  }
+  .ritual-product-actions .card-add-cart-btn {
+    width: auto !important;
+    min-width: unset !important;
+    flex: 2 !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 6px 14px !important;
+    font-size: 0.78rem !important;
+    white-space: nowrap !important;
   }
   .step-badge, .card-badge {
     font-size: 0.55rem !important;
