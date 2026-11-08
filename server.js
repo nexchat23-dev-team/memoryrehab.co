@@ -2,7 +2,8 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
-const { randomUUID } = require('crypto');
+const crypto = require('crypto');
+const { randomUUID } = crypto;
 let put = null;
 try {
   put = require('@vercel/blob').put;
@@ -15,10 +16,27 @@ const PORT = Number(process.env.PORT) || 3000;
 const ROOT_DIR = __dirname;
 const DATA_DIR = path.join(ROOT_DIR, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'store-data.json');
-const ADMIN_PASSKEY = process.env.ADMIN_PASSKEY || '';
+const ADMIN_PASSKEY = process.env.ADMIN_PASSKEY || (process.env.NODE_ENV === 'production' ? '' : 'lab2026');
 
 const SHIPPO_API_KEY = process.env.SHIPPO_API_KEY || process.env.EASYPOST_API_KEY || '';
 const SHIPPING_PROVIDER = (process.env.SHIPPING_PROVIDER || 'shippo').toLowerCase();
+
+const pendingOrders = new Map(); // txRef -> { amount, currency, email, items, createdAt }
+
+function calculateOrderTotal(items, shippingCountry = 'NG') {
+  const store = readStore();
+  let subtotal = 0;
+  for (const item of (Array.isArray(items) ? items : [])) {
+    const prod = store.products.find(p => String(p.id) === String(item.id));
+    if (prod && prod.price) {
+      const qty = Math.max(1, Math.min(50, parseInt(item.quantity, 10) || 1));
+      subtotal += Number(prod.price) * qty;
+    }
+  }
+  const freeThreshold = Number(store.settings?.freeShippingThreshold || process.env.FREE_SHIPPING_THRESHOLD || 70000);
+  const shipping = subtotal >= freeThreshold ? 0 : calculateFallbackShipping(subtotal, shippingCountry);
+  return { subtotal, shipping, total: Number((subtotal + shipping).toFixed(2)) };
+}
 
 function calculateFallbackShipping(subtotal, countryCode) {
   const total = Number(subtotal || 0);
@@ -353,6 +371,30 @@ async function handleRequest(req, res) {
   shimHttpObjects(req, res);
   const sec = await loadSecurity();
 
+  function checkAdminAuth(r) {
+    const adminKey = r.headers['x-admin-key'] || r.headers['x-vault-key'] || r.headers['authorization'] || '';
+    const clean = String(adminKey || '').replace(/^Bearer\s+/i, '').trim();
+    if (!clean || !ADMIN_PASSKEY) return false;
+
+    // Support signed JWT session tokens: mr_adm.<payload>.<sig>
+    if (clean.startsWith('mr_adm.')) {
+      const parts = clean.split('.');
+      if (parts.length === 3) {
+        const expectedSig = crypto.createHmac('sha256', ADMIN_PASSKEY).update(parts[1]).digest('base64url');
+        if (sec.constantTimeSafeEqual(parts[2], expectedSig)) {
+          try {
+            const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+            if (payload.exp && payload.exp > Math.floor(Date.now() / 1000) && payload.sub === 'admin') {
+              return true;
+            }
+          } catch (_) {}
+        }
+      }
+    }
+
+    return sec.constantTimeSafeEqual(clean, ADMIN_PASSKEY);
+  }
+
   // 1. CORS Preflight & Security Headers
   if (sec.handleCors(req, res)) return;
   sec.applySecurityHeaders(res);
@@ -389,12 +431,26 @@ async function handleRequest(req, res) {
 
   // ── REST API ROUTES ──
   if (pathname === '/api/upload' && req.method === 'POST') {
+    if (!checkAdminAuth(req)) {
+      return sendJson(res, 401, { error: 'ADMIN_AUTHORIZATION_REQUIRED' });
+    }
     try {
       const rawFilename = (parsedUrl.query && parsedUrl.query.filename) || req.headers['x-filename'] || 'upload.jpg';
-      const cleanFilename = `products/${Date.now()}_${path.basename(rawFilename).replace(/\s+/g, '_')}`;
+      const baseName = path.basename(rawFilename);
 
+      const ALLOWED_UPLOAD_EXTS = /\.(jpe?g|png|webp|mp4|mov)$/i;
+      if (!ALLOWED_UPLOAD_EXTS.test(baseName)) {
+        return sendJson(res, 400, { error: 'Prohibited file type. SVG and executables are disallowed.' });
+      }
+
+      const MAX_UPLOAD_BYTES = 50 * 1024 * 1024; // 50MB
+      let totalBytes = 0;
       const chunks = [];
       for await (const chunk of req) {
+        totalBytes += chunk.length;
+        if (totalBytes > MAX_UPLOAD_BYTES) {
+          return sendJson(res, 413, { error: 'Payload Too Large. Max allowed upload is 50MB.' });
+        }
         chunks.push(chunk);
       }
       const buffer = Buffer.concat(chunks);
@@ -403,7 +459,18 @@ async function handleRequest(req, res) {
         return sendJson(res, 400, { error: 'Empty file body' });
       }
 
-      const contentType = req.headers['content-type'] || 'image/jpeg';
+      const isJpeg = buffer.length > 3 && buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
+      const isPng = buffer.length > 4 && buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
+      const isWebp = buffer.length > 12 && buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 && buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50;
+      const isMp4 = buffer.length > 8 && buffer.slice(4, 8).toString('ascii') === 'ftyp';
+
+      if (!isJpeg && !isPng && !isWebp && !isMp4) {
+        return sendJson(res, 400, { error: 'Invalid file signature: Content does not match expected image/video format.' });
+      }
+
+      const cleanFilename = `products/${Date.now()}_${baseName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_\-\.]/g, '')}`;
+      const contentType = req.headers['content-type'] || (isJpeg ? 'image/jpeg' : isPng ? 'image/png' : isWebp ? 'image/webp' : 'video/mp4');
+
       const blob = await put(cleanFilename, buffer, {
         access: 'public',
         contentType: contentType,
@@ -443,16 +510,7 @@ async function handleRequest(req, res) {
     });
   }
 
-  const checkAdminAuth = (r) => {
-    const adminKey = r.headers['x-admin-key'] || r.headers['x-vault-key'] || r.headers['authorization'] || '';
-    const clean = String(adminKey || '').replace(/^Bearer\s+/i, '').trim();
-    if (!clean) return false;
-    const valid = [ADMIN_PASSKEY, '$TianYuan26!', 'lab2026'].filter(Boolean);
-    for (const v of valid) {
-      if (sec.constantTimeSafeEqual(clean, v)) return true;
-    }
-    return false;
-  };
+  
 
   if (pathname === '/api/settings') {
     if (req.method === 'GET') {
@@ -549,20 +607,19 @@ async function handleRequest(req, res) {
   if (pathname === '/api/admin/login' && req.method === 'POST') {
     const body = req.body || await parseJsonBody(req);
     const candidate = String(body?.passkey || '').trim();
-    const validPasskeys = [ADMIN_PASSKEY, '$TianYuan26!', 'lab2026'].filter(Boolean);
-    let matched = false;
-    if (candidate) {
-      for (const valid of validPasskeys) {
-        if (sec.constantTimeSafeEqual(candidate, valid)) {
-          matched = true;
-          break;
-        }
-      }
+    if (!candidate || !ADMIN_PASSKEY || !sec.constantTimeSafeEqual(candidate, ADMIN_PASSKEY)) {
+      return sendJson(res, 401, { ok: false, error: 'Invalid passkey' });
     }
-    if (matched) {
-      return sendJson(res, 200, { ok: true, role: 'admin', token: `mr_adm_${Date.now()}` });
-    }
-    return sendJson(res, 401, { ok: false, error: 'Invalid passkey' });
+    const tokenPayload = {
+      sub: 'admin',
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + 3600,
+      nonce: crypto.randomBytes(16).toString('hex')
+    };
+    const tokenData = Buffer.from(JSON.stringify(tokenPayload)).toString('base64url');
+    const tokenSig = crypto.createHmac('sha256', ADMIN_PASSKEY).update(tokenData).digest('base64url');
+    const sessionToken = `mr_adm.${tokenData}.${tokenSig}`;
+    return sendJson(res, 200, { ok: true, role: 'admin', token: sessionToken, expiresIn: 3600 });
   }
 
   // ── Flutterwave Payment Endpoints ──
@@ -590,11 +647,19 @@ async function handleRequest(req, res) {
 
   if (pathname === '/api/payments/flutterwave/initiate' && req.method === 'POST') {
     const body = req.body || await parseJsonBody(req);
-    const amount = Number(body.amount || 0);
     const email = (body.email || '').trim();
 
+    let amount = Number(body.amount || 0);
+    // Server-side calculation if items are provided
+    if (Array.isArray(body.items) && body.items.length > 0) {
+      const calc = calculateOrderTotal(body.items, body.country || 'NG');
+      if (calc.total > 0) {
+        amount = calc.total;
+      }
+    }
+
     if (!amount || !Number.isFinite(amount) || amount < 1 || !email) {
-      return sendJson(res, 400, { ok: false, error: 'Invalid amount or email' });
+      return sendJson(res, 400, { ok: false, error: 'Invalid payment amount or email' });
     }
 
     const flutterwaveSecret = process.env.FLW_SECRET_KEY || process.env.FLUTTERWAVE_SECRET_KEY;
@@ -608,6 +673,16 @@ async function handleRequest(req, res) {
         : ((req.headers.host || '').startsWith('localhost') ? 'http' : 'https');
       const callbackUrl = process.env.FLW_CALLBACK_URL || `${protocol}://${req.headers.host}/api/payments/flutterwave/callback`;
       const txRef = `mrl-${randomUUID()}`;
+
+      // Save pending order for callback amount verification
+      pendingOrders.set(txRef, {
+        amount,
+        currency,
+        email,
+        items: body.items || [],
+        createdAt: Date.now()
+      });
+
       const resp = await fetch('https://api.flutterwave.com/v3/payments', {
         method: 'POST',
         headers: {
@@ -653,12 +728,29 @@ async function handleRequest(req, res) {
       const result = await resp.json();
       const transaction = result?.data;
       const currency = (process.env.FLW_CURRENCY || 'NGN').toUpperCase();
+
+      const expectedOrder = pendingOrders.get(txRef);
+      let amountValid = true;
+      if (expectedOrder) {
+        if (Number(transaction?.amount) !== Number(expectedOrder.amount)) {
+          amountValid = false;
+          console.error(`[PAYMENT FRAUD BLOCKED] tx_ref ${txRef}: expected ${expectedOrder.amount}, received ${transaction?.amount}`);
+        }
+      }
+
       const verified = resp.ok && result?.status === 'success'
         && transaction?.status === 'successful'
         && transaction?.tx_ref === txRef
-        && String(transaction?.currency || '').toUpperCase() === currency;
+        && String(transaction?.currency || '').toUpperCase() === currency
+        && amountValid;
+
+      if (verified && expectedOrder) {
+        pendingOrders.delete(txRef);
+      }
+
       const paymentStatus = verified ? 'success' : 'failed';
-      res.writeHead(302, { Location: `/?payment=${paymentStatus}&reference=${encodeURIComponent(txRef)}` });
+      const failReason = !amountValid ? '&reason=price_tampering_detected' : '';
+      res.writeHead(302, { Location: `/?payment=${paymentStatus}&reference=${encodeURIComponent(txRef)}${failReason}` });
       return res.end();
     } catch (err) {
       console.warn('Flutterwave callback verify error:', err.message);
@@ -781,6 +873,14 @@ async function handleRequest(req, res) {
   if (relativePath === 'product') relativePath = 'product.html';
   if (relativePath === 'auth') relativePath = 'auth.html';
   if (relativePath === 'about') relativePath = 'about.html';
+
+  const PUBLIC_EXTENSIONS = new Set(['.html', '.css', '.js', '.mjs', '.jpg', '.jpeg', '.png', '.webp', '.svg', '.ico', '.mp4', '.mov', '.woff', '.woff2', '.ttf']);
+  const PROHIBITED_PATHS = /^\.(env|git|vercel)|(^|[\/\\])(package\.json|package-lock\.json|server\.js|data|api|rust|asm|sandbox|test-)/i;
+
+  if (PROHIBITED_PATHS.test(relativePath) || (!PUBLIC_EXTENSIONS.has(path.extname(relativePath).toLowerCase()) && relativePath !== '' && !['admin', 'product', 'auth', 'about'].includes(relativePath))) {
+    res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
+    return res.end('Access Denied: Prohibited resource or extension');
+  }
 
   let filePath = path.join(ROOT_DIR, relativePath);
   const resolvedPath = path.resolve(filePath);

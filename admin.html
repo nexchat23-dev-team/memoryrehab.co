@@ -192,7 +192,7 @@
             <div class="admin-field-group">
               <label class="admin-label" for="settingMaintenanceBypassKey">Secret Staff Bypass Passkey</label>
               <div style="position: relative;">
-                <input type="text" id="settingMaintenanceBypassKey" class="admin-input" value="lab2026" style="font-family: monospace; letter-spacing: 0.08em; font-weight: 700;" />
+                <input type="text" id="settingMaintenanceBypassKey" class="admin-input" value="" placeholder="Set secret staff bypass key" style="font-family: monospace; letter-spacing: 0.08em; font-weight: 700;" />
               </div>
               <span class="admin-hint" style="font-size: 0.76rem; color: var(--text-muted); margin-top: 4px; display: block;">Visiting <code>/?bypass=YOUR_KEY</code> or clicking "Staff Access" on the maintenance screen unlocks the live store for testing.</span>
             </div>
@@ -211,7 +211,7 @@
               <a href="index.html?preview=maintenance" target="_blank" class="btn-secondary" style="font-size: 0.82rem; padding: 8px 16px;">
                 👁️ Preview Customer View
               </a>
-              <a href="index.html?bypass=lab2026" id="maintenanceBypassLink" target="_blank" class="btn-secondary" style="font-size: 0.82rem; padding: 8px 16px;">
+              <a href="index.html" id="maintenanceBypassLink" target="_blank" class="btn-secondary" style="font-size: 0.82rem; padding: 8px 16px;">
                 🔓 Open Store with Bypass
               </a>
             </div>
@@ -2449,7 +2449,7 @@
 
       const bypassKeyInput = document.getElementById('settingMaintenanceBypassKey');
       bypassKeyInput?.addEventListener('input', () => {
-        const key = bypassKeyInput.value.trim() || 'lab2026';
+        const key = bypassKeyInput.value.trim();
         const link = document.getElementById('maintenanceBypassLink');
         if (link) link.href = `/?bypass=${encodeURIComponent(key)}`;
       });
@@ -2463,7 +2463,7 @@
         const maintenanceTitle = document.getElementById('settingMaintenanceTitle')?.value.trim() || 'Laboratory Restock & Routine Formulation Update';
         const maintenanceMessage = document.getElementById('settingMaintenanceMessage')?.value.trim() || 'Our apothecary lab is currently restocking fresh botanical batches and calibrating clinical formulations. We will return shortly with freshly compounded barrier care.';
         const maintenanceEstimatedReturn = document.getElementById('settingMaintenanceEstimatedReturn')?.value.trim() || '';
-        const maintenanceBypassKey = document.getElementById('settingMaintenanceBypassKey')?.value.trim() || 'lab2026';
+        const maintenanceBypassKey = document.getElementById('settingMaintenanceBypassKey')?.value.trim() || '';
         const maintenanceAllowWhatsAppOrders = !!document.getElementById('settingMaintenanceWhatsApp')?.checked;
 
         const maintenanceData = {

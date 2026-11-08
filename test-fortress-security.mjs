@@ -1,3 +1,4 @@
+process.env.ADMIN_PASSKEY = process.env.ADMIN_PASSKEY || "lab2026";
 import assert from "assert";
 import {
   enforceWaf,
@@ -40,6 +41,10 @@ function createMockReqRes({
     statusCode: 200,
     headers: {},
     body: null,
+    on(event, handler) { return this; },
+    once(event, handler) { return this; },
+    emit(event, ...args) { return true; },
+    write(chunk) { return true; },
     status(code) {
       this.statusCode = code;
       return this;
@@ -552,7 +557,81 @@ await serverHandler(fakePayReq, fakePayRes);
 assert.strictEqual(fakePayRes.statusCode, 400);
 console.log(" [PASS] Fractional cent / salami slicing payment attempt neutralized");
 
+// [TEST 22] Testing Static Server Protection Against .env & Source Leakage...
+console.log("\n[TEST 22] Testing Static Server Protection Against .env & Source Leakage...");
+const { req: envReq, res: envRes } = createMockReqRes({
+  url: "/.env",
+  method: "GET"
+});
+await serverHandler(envReq, envRes);
+assert.strictEqual(envRes.statusCode, 403);
+
+const { req: pkgReq, res: pkgRes } = createMockReqRes({
+  url: "/package.json",
+  method: "GET"
+});
+await serverHandler(pkgReq, pkgRes);
+assert.strictEqual(pkgRes.statusCode, 403);
+console.log(" [PASS] Root .env and package.json protected against arbitrary HTTP read");
+
+// [TEST 23] Testing Media Upload Security (No SVG XSS & Admin Gate)...
+console.log("\n[TEST 23] Testing Media Upload Security (No SVG XSS & Admin Gate)...");
+const { req: unauthUpReq, res: unauthUpRes } = createMockReqRes({
+  url: "/api/upload?filename=test.jpg",
+  method: "POST"
+});
+await serverHandler(unauthUpReq, unauthUpRes);
+assert.strictEqual(unauthUpRes.statusCode, 401);
+
+const { req: svgUpReq, res: svgUpRes } = createMockReqRes({
+  url: "/api/upload?filename=xss.svg",
+  method: "POST",
+  headers: { "x-admin-key": "lab2026" }
+});
+await serverHandler(svgUpReq, svgUpRes);
+assert.strictEqual(svgUpRes.statusCode, 400);
+console.log(" [PASS] SVG uploads blocked (Stored XSS eliminated) and unauthenticated uploads rejected (401)");
+
+// [TEST 24] Testing WAF Precision: Zero False Positives on Conversational English...
+console.log("\n[TEST 24] Testing WAF Precision: Zero False Positives on Conversational English...");
+const conversationalPhrases = [
+  "Please select an option from the menu",
+  "Can you select a date from next week?",
+  "select items from inventory"
+];
+for (const phrase of conversationalPhrases) {
+  const { req: phraseReq, res: phraseRes } = createMockReqRes({
+    url: `/api/products?search=${encodeURIComponent(phrase)}`,
+    method: "GET"
+  });
+  const passed = enforceWaf(phraseReq, phraseRes);
+  assert.strictEqual(passed, true, `Phrase falsely blocked: "${phrase}"`);
+}
+console.log(" [PASS] Natural conversational phrases pass WAF without false positive blocks");
+
+// [TEST 25] Testing Signed Admin Session Token Authentication...
+console.log("\n[TEST 25] Testing Signed Admin Session Token Authentication...");
+const { req: loginTokenReq, res: loginTokenRes } = createMockReqRes({
+  url: "/api/admin/login",
+  method: "POST",
+  body: { passkey: "lab2026" }
+});
+await serverHandler(loginTokenReq, loginTokenRes);
+assert.strictEqual(loginTokenRes.statusCode, 200);
+const issuedToken = loginTokenRes.body?.token;
+assert.ok(issuedToken && issuedToken.startsWith("mr_adm."), "Token must be signed JWT format");
+
+const { req: jwtSettingsReq, res: jwtSettingsRes } = createMockReqRes({
+  url: "/api/settings",
+  method: "PUT",
+  headers: { "x-admin-key": issuedToken },
+  body: { promoDiscount: 18 }
+});
+await serverHandler(jwtSettingsReq, jwtSettingsRes);
+assert.strictEqual(jwtSettingsRes.statusCode, 200);
+console.log(" [PASS] Cryptographically signed session token successfully authenticated admin action");
+
 console.log("\n==================================================================");
-console.log("🎉 ALL 21 MEMORY REHAB FORTRESS SECURITY & OS SWARM TESTS PASSED 100%!");
+console.log("🎉 ALL 25 MEMORY REHAB FORTRESS SECURITY & OS SWARM TESTS PASSED 100%!");
 console.log("==================================================================");
 process.exit(0);

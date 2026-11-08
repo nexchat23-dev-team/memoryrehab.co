@@ -529,18 +529,28 @@ export function validateSafeUrl(targetUrl) {
     return { safe: false, reason: `Unsupported protocol: ${parsed.protocol}` };
   }
 
-  const hostname = parsed.hostname.toLowerCase();
+  const hostname = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
   for (const prohibited of SSRF_PROHIBITED_HOSTS) {
     if (hostname === prohibited || hostname.endsWith(`.${prohibited}`)) {
       return { safe: false, reason: `SSRF Blocked: Prohibited metadata or internal destination (${hostname})` };
     }
   }
 
-  // Check RFC-1918 private subnets
+  if (hostname === "::" || hostname === "::1" || hostname.startsWith("fe80:") || hostname.startsWith("fc00:") || hostname.startsWith("fd")) {
+    return { safe: false, reason: `SSRF Blocked: Loopback or Link-Local IPv6 (${hostname})` };
+  }
+
+  // Check RFC-1918, RFC-3927 (Link-Local), RFC-6598 (CGNAT), RFC-1122 (Loopback) subnets
   const ipMatch = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
   if (ipMatch) {
     const [, a, b] = ipMatch.map(Number);
-    if (a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || a === 127) {
+    if (
+      a === 0 || a === 127 || a === 10 ||
+      (a === 169 && b === 254) ||
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) ||
+      (a === 100 && b >= 64 && b <= 127)
+    ) {
       return { safe: false, reason: `SSRF Blocked: Private IP subnet target (${hostname})` };
     }
   }
@@ -552,18 +562,14 @@ export function validateSafeUrl(targetUrl) {
 // 5. AST LEXICAL WAF: SQLi, NoSQLi, XSS, Path Traversal Patterns
 // ==============================================================================
 export const sqlInjectionPatterns = [
-  /(\b(SELECT\s+[\w*`\"'\s,]+FROM|INSERT\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM|DROP\s+(TABLE|DATABASE|VIEW|INDEX)|UNION\s+(ALL\s+)?SELECT|ALTER\s+TABLE|EXEC(UTE)?\s*\(?)\b)/i,
-  /(['";])\s*(OR|AND)\s+\d+\s*[=<>]/i,          // ' OR 1=1
-  /(--|\/\*|\*\/|[';]\s*#|#\s+(?:SELECT|UPDATE|DELETE|INSERT|DROP|UNION|FROM|WHERE))/i, // SQL comments
-  /(\bWAITFOR\b\s+\bDELAY\b)/i,                   // Time-based blind SQLi
-  /(\bBENCHMARK\b\s*\()/i,                         // MySQL benchmark
-  /(\bSLEEP\b\s*\()/i,                             // MySQL sleep
-  /(LOAD_FILE|INTO\s+OUTFILE|INTO\s+DUMPFILE)/i,   // File operations
-  /(\bCHAR\b\s*\()/i,                              // CHAR() encoding bypass
-  /(\bCONCAT\b\s*\()/i,                            // String concatenation attacks
-  /(0x[0-9a-fA-F]+)/,                              // Hex-encoded payloads
-  /(%27|%22|%23|%3B)/i,                            // URL-encoded quotes/semicolons
-  /(\$where|\$regex|\$gt|\$lt|\$ne|\$in|\$nin|\$or|\$and|\$not|\$expr)/i, // NoSQL MongoDB operators
+  /\b(?:['";]\s*|\bUNION(?:\s+ALL)?[\s(]+)SELECT\b|\bSELECT\s+(?:\*|[\w`"',.\s()]+?)\s+FROM\s+[`"'\w.]+(?:\s+(?:WHERE|LIMIT|GROUP|ORDER|JOIN|HAVING)\b|\s*(?:--|\/\*|;|$))/i,
+  /\b(?:INSERT\s+INTO|UPDATE\s+[`"'\w.]+\s+SET|DELETE\s+FROM|DROP\s+(?:TABLE|DATABASE|VIEW|INDEX)|ALTER\s+TABLE|TRUNCATE\s+(?:TABLE\s+)?\w+)\b/i,
+  /(?:['";]\s*)?\b(?:OR|AND)\b\s+(?:['"]?\w+['"]?\s*=\s*['"]?\w+['"]?|\d+\s*[=<>]\s*\d+|TRUE\b)/i,
+  /(?:--[\s\r\n]|\/\*[\s\S]*?\*\/|[';]\s*#\s*|#\s+(?:SELECT|UPDATE|DELETE|INSERT|DROP|UNION|FROM|WHERE))/i,
+  /\b(?:WAITFOR\s+DELAY|SLEEP\s*\(\s*\d+\s*\)|PG_SLEEP\s*\(\s*\d+\s*\)|BENCHMARK\s*\(\s*\d+)/i,
+  /\b(?:LOAD_FILE|INTO\s+(?:OUTFILE|DUMPFILE)|XP_CMDSHELL|EXEC(?:UTE)?\s*\()/i,
+  /\b(?:CHAR|CHR|CONCAT)\s*\(\s*\d+/i,
+  /(?:\$where|\$regex|\$gt|\$gte|\$lt|\$lte|\$ne|\$in|\$nin|\$or|\$and|\$not|\$expr|\$lookup|\$accumulator|\$function)\b/i,
 ];
 
 export const XSS_PATTERNS = [
@@ -577,11 +583,23 @@ export const XSS_PATTERNS = [
 ];
 
 // Deobfuscates Unicode homoglyphs and full-width characters
-function normalizeUnicode(input) {
-  if (typeof input !== "string") return "";
-  return input
-    .normalize("NFKC")
-    .replace(/[\uff01-\uff5e]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0));
+const ZERO_WIDTH_REGEX = /[\u200B-\u200F\uFEFF\u2060\u00AD\u180E\u2000-\u200A\u2028-\u202F\u205F\u2066-\u2069\u3000\u034F\uFE00-\uFE0F]/g;
+const EXTENDED_HOMOGLYPH_MAP = {
+  "а": "a", "с": "c", "е": "e", "о": "o", "р": "p", "ѕ": "s", "х": "x", "у": "y", "і": "i", "ј": "j",
+  "ԁ": "d", "ԛ": "q", "ѡ": "w", "ӏ": "l", "ո": "n", "օ": "o", "υ": "u", "ν": "v",
+  "А": "A", "В": "B", "С": "C", "Е": "E", "Н": "H", "І": "I", "Ј": "J", "К": "K", "М": "M", "О": "O", "Р": "P", "Ѕ": "S", "Т": "T", "Х": "X", "Ү": "Y",
+  "α": "a", "ο": "o", "ν": "v", "ρ": "p", "τ": "t", "ι": "i", "κ": "k", "ε": "e", "ω": "w",
+  "Α": "A", "Β": "B", "Ε": "E", "Ζ": "Z", "Η": "H", "Ι": "I", "Κ": "K", "Μ": "M", "Ν": "N", "Ο": "O", "Ρ": "P", "Τ": "T", "Υ": "Y", "Χ": "X",
+  "ı": "i"
+};
+
+export function normalizeUnicode(input) {
+  if (typeof input !== "string" || input.length === 0) return "";
+  let str = input.replace(ZERO_WIDTH_REGEX, "");
+  try { str = str.normalize("NFKC"); } catch (_) {}
+  let result = "";
+  for (const ch of str) result += EXTENDED_HOMOGLYPH_MAP[ch] || ch;
+  return result;
 }
 
 // ==============================================================================

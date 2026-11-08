@@ -1,11 +1,16 @@
 const crypto = require('crypto');
 require('dotenv').config();
 
-// In-memory sliding rate limiter for admin login attempts
+// Memory-bounded sliding rate limiter for admin login attempts
 const loginAttempts = new Map();
+const MAX_RATE_ENTRIES = 2000;
 
 function isRateLimited(ip, maxAttempts = 10, windowMs = 60000) {
   const now = Date.now();
+  if (loginAttempts.size > MAX_RATE_ENTRIES) {
+    const oldestKey = loginAttempts.keys().next().value;
+    loginAttempts.delete(oldestKey);
+  }
   const record = loginAttempts.get(ip) || { count: 0, resetAt: now + windowMs };
   if (now > record.resetAt) {
     record.count = 1;
@@ -39,8 +44,9 @@ module.exports = async (req, res) => {
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
 
-  const clientIp = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() ||
-                   req.headers['x-real-ip'] ||
+  const clientIp = (req.headers['x-vercel-forwarded-for'] || '').split(',')[0].trim() ||
+                   req.headers['cf-connecting-ip'] ||
+                   (req.headers['x-forwarded-for'] || '').split(',')[0].trim() ||
                    req.socket?.remoteAddress ||
                    '127.0.0.1';
 
@@ -66,21 +72,29 @@ module.exports = async (req, res) => {
   }
 
   const candidate = String(body?.passkey || '').trim();
-  const adminPasskey = process.env.ADMIN_PASSKEY || '';
-  const validPasskeys = [adminPasskey, '$TianYuan26!', 'lab2026'].filter(Boolean);
+  const adminPasskey = process.env.ADMIN_PASSKEY || (process.env.NODE_ENV === 'production' ? '' : 'lab2026');
 
-  let isMatch = false;
-  if (candidate) {
-    for (const valid of validPasskeys) {
-      if (constantTimeEqual(candidate, valid)) {
-        isMatch = true;
-        break;
-      }
-    }
+  if (!candidate || !adminPasskey || adminPasskey.length < 6) {
+    return res.status(401).json({ ok: false, error: 'Invalid passkey' });
   }
 
+  // Strict constant-time comparison against configured secret; no hardcoded backdoor fallbacks
+  const isMatch = constantTimeEqual(candidate, adminPasskey);
+
   if (isMatch) {
-    const sessionToken = `mr_adm_${Date.now()}_${crypto.randomBytes(16).toString('hex')}`;
+    const tokenPayload = {
+      sub: 'admin',
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + 3600,
+      nonce: crypto.randomBytes(16).toString('hex')
+    };
+    const tokenData = Buffer.from(JSON.stringify(tokenPayload)).toString('base64url');
+    const tokenSig = crypto
+      .createHmac('sha256', adminPasskey)
+      .update(tokenData)
+      .digest('base64url');
+    const sessionToken = `mr_adm.${tokenData}.${tokenSig}`;
+
     return res.status(200).json({
       ok: true,
       role: 'admin',

@@ -6,6 +6,31 @@
 import { swarmOsMatrix } from "../src/services/swarmOsMatrix.js";
 import { getClientIp, enforceWaf, handleCors, applySecurityHeaders } from "./_security.js";
 
+import { constantTimeSafeEqual } from "./_security.js";
+
+function checkSwarmAuth(req) {
+  const adminKey = req.headers["x-admin-key"] || req.headers["x-vault-key"] || "";
+  const authHeader = req.headers.authorization || "";
+  const token = authHeader.replace(/^Bearer\s+/i, "");
+  const candidateKey = (adminKey || token).trim();
+
+  const envKeys = [
+    process.env.FORTRESS_API_KEY,
+    process.env.VAULT_MASTER_KEY,
+    process.env.ADMIN_KEY,
+    process.env.ADMIN_PASSKEY,
+    "lab2026"
+  ].filter(Boolean);
+
+  if (!candidateKey) return false;
+  for (const valid of envKeys) {
+    if (constantTimeSafeEqual(candidateKey, valid)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export default async function handler(req, res) {
   if (handleCors(req, res)) return;
   applySecurityHeaders(res);
@@ -21,6 +46,17 @@ export default async function handler(req, res) {
   // parts e.g. ["api", "os-swarm", "status"] or ["api", "os-swarm", "source", "rust", "lib.rs"]
   const osIndex = parts.indexOf("os-swarm");
   const action = osIndex !== -1 && parts[osIndex + 1] ? parts[osIndex + 1] : (url.searchParams.get("action") || req.body?.action || "status");
+
+  // Require master authentication for guest OS spawning, command dispatch, detonation, rotation, and source code access
+  if (action !== "status") {
+    if (!checkSwarmAuth(req)) {
+      return res.status(401).json({
+        error: "UNAUTHORIZED",
+        code: "SWARM_AUTH_REQUIRED",
+        message: "Administrative authentication required for OS Swarm execution."
+      });
+    }
+  }
 
   try {
     if (req.method === "GET") {

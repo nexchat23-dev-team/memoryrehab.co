@@ -158,6 +158,7 @@ service cloud.firestore {
 
     function isEmailOwner(email) {
       return isAuthenticated() &&
+        request.auth.token.get('email_verified', false) == true &&
         request.auth.token.get('email', '') != '' &&
         request.auth.token.email.lower() == email.lower();
     }
@@ -229,10 +230,10 @@ service cloud.firestore {
     }
 
     function canUpdateRole() {
-      return !('role' in request.resource.data) ||
-        !('role' in resource.data) ||
-        request.resource.data.role == resource.data.role ||
-        isAdmin();
+      return isAdmin() ||
+        (!('role' in request.resource.data)) ||
+        (('role' in resource.data) && request.resource.data.role == resource.data.role) ||
+        (!('role' in resource.data) && request.resource.data.role in ['client', 'customer', 'user']);
     }
 
     // ===============================================================
@@ -277,7 +278,6 @@ service cloud.firestore {
       && isValidOptionalString(data, 'maintenanceMessage', 0, 2000)
       && isValidOptionalString(data, 'maintenanceEstimatedReturn', 0, 200)
       && isValidOptionalBool(data, 'maintenanceAllowWhatsAppOrders')
-      && isValidOptionalString(data, 'maintenanceBypassKey', 0, 100)
       && isValidOptionalString(data, 'themeAccentColor', 0, 50)
       && isValidOptionalString(data, 'darkTheme', 0, 50)
       && isValidOptionalBool(data, 'autoThemeEnabled')
