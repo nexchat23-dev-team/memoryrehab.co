@@ -1,0 +1,53 @@
+// ==============================================================================
+// FORTRESS X64DBG AUTOMATION SCRIPT & ANTI-DEBUG ANALYSIS PROBE
+// Target: Fortress_ASM_Sandbox_Harness.exe / fortress_native_runner.exe
+// Usage: File -> Open Script -> Run (or Ctrl+F2 -> script.run in command box)
+// ==============================================================================
+
+log "=================================================================="
+log "🛡️  FORTRESS X64DBG AUTOMATION SCRIPT - INITIALIZED"
+log "=================================================================="
+
+// 1. Initial State Inspection
+log "Current Instruction Pointer (RIP): {rip}"
+disasm {rip}
+
+// 2. Dump General Purpose Registers
+log "--- General Purpose Registers ---"
+log "RAX: {rax} | RBX: {rbx} | RCX: {rcx} | RDX: {rdx}"
+log "RSI: {rsi} | RDI: {rdi} | RBP: {rbp} | RSP: {rsp}"
+log "R8 : {r8}  | R9 : {r9}  | R10: {r10} | R11: {r11}"
+log "R12: {r12} | R13: {r13} | R14: {r14} | R15: {r15}"
+
+// 3. Inspect Windows x64 TEB & PEB Structures
+log "--- TEB / PEB Inspection ---"
+log "Thread Environment Block (TEB): {gs:[0x30]}"
+log "Process Environment Block (PEB): {gs:[0x60]}"
+
+// Check BeingDebugged flag (PEB + 0x02)
+var peb_addr
+peb_addr = {gs:[0x60]}
+log "PEB Address Resolved: " + peb_addr
+
+var being_debugged
+being_debugged = {byte:[peb_addr + 2]}
+log "PEB.BeingDebugged (PEB+0x02): " + being_debugged
+
+// Check NtGlobalFlag (PEB + 0xBC)
+var nt_global_flag
+nt_global_flag = {dword:[peb_addr + 0xbc]}
+log "PEB.NtGlobalFlag (PEB+0xBC): " + nt_global_flag
+
+// 4. Audit Hardware Breakpoint Registers
+log "--- Hardware Breakpoint Registers ---"
+log "DR0: {dr0} | DR1: {dr1} | DR2: {dr2} | DR3: {dr3}"
+log "DR6: {dr6} | DR7: {dr7}"
+
+// 5. Memory Page Protection Check
+log "--- Inspecting Top of Stack (RSP) ---"
+dump {rsp}
+
+log "=================================================================="
+log "✅ X64DBG AUDIT COMPLETE - FORTRESS SANDBOX UNDER OBSERVATION"
+log "=================================================================="
+stop

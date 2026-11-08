@@ -866,7 +866,11 @@
             submitBtn.querySelector('span').textContent = 'Sharing Your Experience…';
 
             try {
+              const fbAuthUser = (typeof firebase !== 'undefined' && firebase.auth) ? firebase.auth().currentUser : null;
+              const authorId = fbAuthUser ? fbAuthUser.uid : (currentUser.uid || '');
+
               await db.collection('reviews').doc(productId).collection('entries').add({
+                authorId: authorId,
                 name:     currentUser.name || 'Anonymous',
                 email:    currentUser.email || '',
                 skinType: currentUser.skinType || '',

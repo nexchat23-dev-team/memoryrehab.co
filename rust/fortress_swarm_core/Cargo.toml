@@ -1,0 +1,36 @@
+[package]
+name = "fortress_swarm_core"
+version = "12.6.0"
+edition = "2021"
+authors = ["alexhack235-code <alex@fortress.local>", "NEXO-TECH Cyber Defense Systems"]
+description = "FORTRESS Layer 35: Polymorphic OS Swarm & Memory-Safe Microkernel Hypervisor Core in Rust"
+license = "MIT OR Apache-2.0"
+keywords = ["security", "hypervisor", "pqc", "dilithium5", "microkernel"]
+categories = ["cryptography", "os", "emulators"]
+
+[dependencies]
+# Dependencies for cryptography, serialization, and high-performance computing
+sha2 = "0.10"
+sha3 = "0.10"
+aes-gcm = "0.10"
+rand = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+hex = "0.4"
+chrono = "0.4"
+
+[lib]
+name = "fortress_swarm_core"
+path = "src/lib.rs"
+crate-type = ["rlib", "cdylib"]
+
+[[bin]]
+name = "fortress-swarm"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

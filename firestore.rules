@@ -1,42 +1,521 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 1. Store settings (announcements, free shipping threshold, promos, themes, maintenance, footer)
+
+    // ===============================================================
+    // Assumed Data Model & Schema Definitions
+    // ===============================================================
+    //
+    // 1. Collection: /store_settings/{document}
+    //    Document ID: 'general' (or store setting keys)
+    //    Fields:
+    //      - storeName: string (optional, 0-100 chars)
+    //      - storeTagline: string (optional, 0-200 chars)
+    //      - brandMonogram: string (optional, 0-20 chars)
+    //      - footerBio: string (optional, 0-1000 chars)
+    //      - footerYear: string (optional, 0-20 chars)
+    //      - footerCopyright: string (optional, 0-200 chars)
+    //      - footerTagline: string (optional, 0-200 chars)
+    //      - announcement: string (optional, 0-500 chars)
+    //      - announcements: list of strings (optional, <= 20 items)
+    //      - promoCode: string (optional, 0-50 chars)
+    //      - promoDiscount: number (optional, 0-100%)
+    //      - freeShippingThreshold: number (optional, >= 0)
+    //      - currencySymbol: string (optional, 0-10 chars)
+    //      - whatsappNumber: string (optional, 0-50 chars)
+    //      - whatsappDisplay: string (optional, 0-50 chars)
+    //      - whatsappUrl: string (optional, 0-500 chars)
+    //      - instagramHandle: string (optional, 0-100 chars)
+    //      - instagramUrl: string (optional, 0-500 chars)
+    //      - tiktokHandle: string (optional, 0-100 chars)
+    //      - tiktokUrl: string (optional, 0-500 chars)
+    //      - maintenanceMode: bool (optional)
+    //      - maintenanceTitle: string (optional, 0-200 chars)
+    //      - maintenanceMessage: string (optional, 0-2000 chars)
+    //      - maintenanceEstimatedReturn: string (optional, 0-200 chars)
+    //      - maintenanceAllowWhatsAppOrders: bool (optional)
+    //      - maintenanceBypassKey: string (optional, 0-100 chars)
+    //      - themeAccentColor: string (optional, 0-50 chars)
+    //      - darkTheme: string (optional, 0-50 chars)
+    //      - autoThemeEnabled: bool (optional)
+    //      - autoThemeInterval: number (optional, 1-86400 seconds)
+    //      - autoThemeMode: string (optional, 0-50 chars)
+    //      - autoThemeSmooth: bool (optional)
+    //      - heroEyebrow: string (optional, 0-200 chars)
+    //      - heroHeadline: string (optional, 0-300 chars)
+    //      - heroDescription: string (optional, 0-2000 chars)
+    //      - heroPrimaryCta: string (optional, 0-100 chars)
+    //      - updatedAt: timestamp or string (optional)
+    //      - createdAt: timestamp or string (optional)
+    //
+    // 2. Collection: /products/{productId}
+    //    Document ID: string identifier (e.g. '1', '2', 'prod_123')
+    //    Fields:
+    //      - id: string (optional, 1-100 chars)
+    //      - name: string (required, 1-200 chars)
+    //      - price: number (required, >= 0)
+    //      - originalPrice: number (optional, >= 0)
+    //      - step: string (optional, 0-100 chars)
+    //      - badge: string (optional, 0-100 chars)
+    //      - image: string (optional, 0-5000 chars)
+    //      - size: string (optional, 0-100 chars)
+    //      - skinType: string (optional, 0-200 chars)
+    //      - rating: number (optional, 0-5)
+    //      - reviews: number (optional, >= 0)
+    //      - summary: string (optional, 0-2000 chars)
+    //      - ingredients: list of strings (optional, <= 100 items)
+    //      - inStock: bool (optional)
+    //      - clinical: list of maps (optional, <= 20 items)
+    //      - actives: list of maps (optional, <= 20 items)
+    //      - inci: string (optional, 0-5000 chars)
+    //      - reviewsList: list of maps (optional, <= 100 items)
+    //      - updatedAt: timestamp or string (optional)
+    //      - createdAt: timestamp or string (optional)
+    //
+    // 3. Collection: /reviews/{productId}/entries/{reviewId}
+    //    Document ID: auto-generated or review identifier
+    //    Fields:
+    //      - authorId: string (required, 1-128 chars, matches request.auth.uid, immutable)
+    //      - rating: number (required, 1-5)
+    //      - body: string (required, 1-1999 chars, strictly < 2000 chars)
+    //      - createdAt: timestamp (required, recent on create <= request.time, immutable)
+    //      - name: string (optional, 0-100 chars)
+    //      - email: string (optional, 0-150 chars)
+    //      - skinType: string (optional, 0-100 chars)
+    //      - updatedAt: timestamp (optional)
+    //
+    // 4. Collection: /user_wishlists/{userEmail}
+    //    Document ID: userEmail (lowercase email address)
+    //    Fields:
+    //      - items: list (optional, <= 200 items)
+    //      - updatedAt: timestamp or string (optional)
+    //
+    // 5. Collection: /users/{userId}
+    //    Document ID: userId (matches request.auth.uid)
+    //    Fields:
+    //      - uid: string (optional, matches userId, immutable)
+    //      - name: string (optional, 0-100 chars)
+    //      - email: string (optional, valid email format, 0-150 chars)
+    //      - skinType: string (optional, 0-100 chars)
+    //      - photo: string (optional, 0-2000 chars)
+    //      - level: number (optional, >= 1)
+    //      - levelName: string (optional, 0-100 chars)
+    //      - streak: number (optional, >= 0)
+    //      - tenure: string or number (optional, 0-100 chars)
+    //      - badges: list of strings (optional, <= 50 items)
+    //      - ordersCount: number (optional, >= 0)
+    //      - totalSpend: number (optional, >= 0)
+    //      - role: string (optional, cannot self-escalate to admin)
+    //      - createdAt: timestamp or string (optional, immutable)
+    //      - updatedAt: timestamp or string (optional)
+    //
+    // 6. Collection: /user_profiles/{userEmail}
+    //    Document ID: userEmail (lowercase email address)
+    //    Fields: Same schema as /users/{userId}
+    //
+    // 7. Collection: /orders/{orderId}
+    //    Document ID: order identifier (e.g. 'MR-123456')
+    //    Fields:
+    //      - id / orderId: string (optional, 1-100 chars, immutable)
+    //      - customerId: string (optional, 1-128 chars, matches request.auth.uid, immutable)
+    //      - customerEmail: string (optional, 1-150 chars, valid email)
+    //      - customer: map (optional, <= 20 fields)
+    //      - items: list of maps (required, 1-100 items)
+    //      - totalAmount / total: number (required, > 0)
+    //      - subtotal: number (optional, >= 0)
+    //      - shipping: number (optional, >= 0)
+    //      - currency: string (optional, 1-10 chars)
+    //      - status: string (required, 'pending' on create; admin updates to shipped, paid, fulfilled)
+    //      - achievement: map (optional, <= 10 fields)
+    //      - date: string (optional, 0-100 chars)
+    //      - createdAt: timestamp or string (optional, immutable)
+    //      - updatedAt: timestamp or string (optional)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Core Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        ('admin' in request.auth.token && request.auth.token.admin == true) ||
+        request.auth.token.get('admin', false) == true ||
+        request.auth.token.get('role', '') == 'admin' ||
+        (request.auth.token.get('email_verified', false) == true &&
+         request.auth.token.get('email', '') in ['admin@memoryrehab.co', 'owner@memoryrehab.co'])
+      );
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isEmailOwner(email) {
+      return isAuthenticated() &&
+        request.auth.token.get('email', '') != '' &&
+        request.auth.token.email.lower() == email.lower();
+    }
+
+    function uidUnchanged() {
+      return !('uid' in request.resource.data) ||
+        request.resource.data.uid == request.auth.uid;
+    }
+
+    function uidNotModified() {
+      return !('uid' in request.resource.data) ||
+        !('uid' in resource.data) ||
+        request.resource.data.uid == resource.data.uid;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    function isValidOptionalString(data, field, minLen, maxLen) {
+      return !(field in data) ||
+        (data[field] is string &&
+         data[field].size() >= minLen &&
+         data[field].size() <= maxLen);
+    }
+
+    function isValidOptionalNumber(data, field, minVal, maxVal) {
+      return !(field in data) ||
+        (data[field] is number &&
+         data[field] >= minVal &&
+         data[field] <= maxVal);
+    }
+
+    function isValidOptionalBool(data, field) {
+      return !(field in data) || data[field] is bool;
+    }
+
+    function isValidOptionalList(data, field, maxSize) {
+      return !(field in data) || (data[field] is list && data[field].size() <= maxSize);
+    }
+
+    function isValidOptionalMap(data, field, maxKeys) {
+      return !(field in data) || (data[field] is map && data[field].keys().size() <= maxKeys);
+    }
+
+    function isValidEmail(email) {
+      return email is string &&
+        email.size() >= 3 && email.size() <= 150 &&
+        email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+    }
+
+    function isRecent(time) {
+      return time is timestamp &&
+        time <= request.time &&
+        time >= request.time - duration.value(5, 'm');
+    }
+
+    // Role Escalation Prevention
+    function canSetRole(data) {
+      return !('role' in data) || data.role in ['client', 'customer', 'user'] || isAdmin();
+    }
+
+    function canUpdateRole() {
+      return !('role' in request.resource.data) ||
+        !('role' in resource.data) ||
+        request.resource.data.role == resource.data.role ||
+        isAdmin();
+    }
+
+    // ===============================================================
+    // Domain Validator Functions
+    // ===============================================================
+
+    function isValidStoreSettings(data) {
+      return hasOnlyAllowedFields([
+        'storeName', 'storeTagline', 'brandMonogram', 'footerBio', 'footerYear',
+        'footerCopyright', 'footerTagline', 'announcement', 'announcements',
+        'promoCode', 'promoDiscount', 'freeShippingThreshold', 'currencySymbol',
+        'whatsappNumber', 'whatsappDisplay', 'whatsappUrl', 'instagramHandle',
+        'instagramUrl', 'tiktokHandle', 'tiktokUrl', 'maintenanceMode',
+        'maintenanceTitle', 'maintenanceMessage', 'maintenanceEstimatedReturn',
+        'maintenanceAllowWhatsAppOrders', 'maintenanceBypassKey',
+        'themeAccentColor', 'darkTheme', 'autoThemeEnabled', 'autoThemeInterval',
+        'autoThemeMode', 'autoThemeSmooth', 'heroEyebrow', 'heroHeadline',
+        'heroDescription', 'heroPrimaryCta', 'updatedAt', 'createdAt'
+      ])
+      && isValidOptionalString(data, 'storeName', 0, 100)
+      && isValidOptionalString(data, 'storeTagline', 0, 200)
+      && isValidOptionalString(data, 'brandMonogram', 0, 20)
+      && isValidOptionalString(data, 'footerBio', 0, 1000)
+      && isValidOptionalString(data, 'footerYear', 0, 20)
+      && isValidOptionalString(data, 'footerCopyright', 0, 200)
+      && isValidOptionalString(data, 'footerTagline', 0, 200)
+      && isValidOptionalString(data, 'announcement', 0, 500)
+      && isValidOptionalList(data, 'announcements', 20)
+      && isValidOptionalString(data, 'promoCode', 0, 50)
+      && isValidOptionalNumber(data, 'promoDiscount', 0, 100)
+      && isValidOptionalNumber(data, 'freeShippingThreshold', 0, 100000000)
+      && isValidOptionalString(data, 'currencySymbol', 0, 10)
+      && isValidOptionalString(data, 'whatsappNumber', 0, 50)
+      && isValidOptionalString(data, 'whatsappDisplay', 0, 50)
+      && isValidOptionalString(data, 'whatsappUrl', 0, 500)
+      && isValidOptionalString(data, 'instagramHandle', 0, 100)
+      && isValidOptionalString(data, 'instagramUrl', 0, 500)
+      && isValidOptionalString(data, 'tiktokHandle', 0, 100)
+      && isValidOptionalString(data, 'tiktokUrl', 0, 500)
+      && isValidOptionalBool(data, 'maintenanceMode')
+      && isValidOptionalString(data, 'maintenanceTitle', 0, 200)
+      && isValidOptionalString(data, 'maintenanceMessage', 0, 2000)
+      && isValidOptionalString(data, 'maintenanceEstimatedReturn', 0, 200)
+      && isValidOptionalBool(data, 'maintenanceAllowWhatsAppOrders')
+      && isValidOptionalString(data, 'maintenanceBypassKey', 0, 100)
+      && isValidOptionalString(data, 'themeAccentColor', 0, 50)
+      && isValidOptionalString(data, 'darkTheme', 0, 50)
+      && isValidOptionalBool(data, 'autoThemeEnabled')
+      && isValidOptionalNumber(data, 'autoThemeInterval', 1, 86400)
+      && isValidOptionalString(data, 'autoThemeMode', 0, 50)
+      && isValidOptionalBool(data, 'autoThemeSmooth')
+      && isValidOptionalString(data, 'heroEyebrow', 0, 200)
+      && isValidOptionalString(data, 'heroHeadline', 0, 300)
+      && isValidOptionalString(data, 'heroDescription', 0, 2000)
+      && isValidOptionalString(data, 'heroPrimaryCta', 0, 100)
+      && (!('updatedAt' in data) || data.updatedAt is timestamp || data.updatedAt is string)
+      && (!('createdAt' in data) || data.createdAt is timestamp || data.createdAt is string);
+    }
+
+    function isValidProduct(data) {
+      return hasOnlyAllowedFields([
+        'id', 'name', 'price', 'originalPrice', 'step', 'badge', 'image',
+        'size', 'skinType', 'rating', 'reviews', 'summary', 'ingredients',
+        'inStock', 'clinical', 'actives', 'inci', 'reviewsList',
+        'updatedAt', 'createdAt'
+      ])
+      && hasRequiredFields(['name', 'price'])
+      && data.name is string && data.name.size() > 0 && data.name.size() <= 200
+      && data.price is number && data.price >= 0 && data.price <= 100000000
+      && isValidOptionalNumber(data, 'originalPrice', 0, 100000000)
+      && isValidOptionalString(data, 'id', 1, 100)
+      && isValidOptionalString(data, 'step', 0, 100)
+      && isValidOptionalString(data, 'badge', 0, 100)
+      && isValidOptionalString(data, 'image', 0, 5000)
+      && isValidOptionalString(data, 'size', 0, 100)
+      && isValidOptionalString(data, 'skinType', 0, 200)
+      && isValidOptionalNumber(data, 'rating', 0, 5)
+      && isValidOptionalNumber(data, 'reviews', 0, 1000000)
+      && isValidOptionalString(data, 'summary', 0, 2000)
+      && isValidOptionalList(data, 'ingredients', 100)
+      && isValidOptionalBool(data, 'inStock')
+      && isValidOptionalList(data, 'clinical', 20)
+      && isValidOptionalList(data, 'actives', 20)
+      && isValidOptionalString(data, 'inci', 0, 5000)
+      && isValidOptionalList(data, 'reviewsList', 100)
+      && (!('updatedAt' in data) || data.updatedAt is timestamp || data.updatedAt is string)
+      && (!('createdAt' in data) || data.createdAt is timestamp || data.createdAt is string);
+    }
+
+    function isValidReview(data) {
+      return hasOnlyAllowedFields([
+        'authorId', 'rating', 'body', 'createdAt',
+        'name', 'email', 'skinType', 'updatedAt'
+      ])
+      && hasRequiredFields(['authorId', 'rating', 'body', 'createdAt'])
+      && data.authorId is string && data.authorId.size() > 0 && data.authorId.size() <= 128
+      && data.rating is number && data.rating >= 1 && data.rating <= 5
+      && data.body is string && data.body.size() >= 1 && data.body.size() < 2000
+      && data.createdAt is timestamp
+      && isValidOptionalString(data, 'name', 0, 100)
+      && isValidOptionalString(data, 'email', 0, 150)
+      && isValidOptionalString(data, 'skinType', 0, 100)
+      && (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    function isValidWishlist(data) {
+      return hasOnlyAllowedFields(['items', 'updatedAt'])
+        && isValidOptionalList(data, 'items', 200)
+        && (!('updatedAt' in data) || data.updatedAt is timestamp || data.updatedAt is string);
+    }
+
+    function isValidUserProfile(data) {
+      return hasOnlyAllowedFields([
+        'uid', 'name', 'email', 'skinType', 'photo', 'level', 'levelName',
+        'streak', 'tenure', 'badges', 'ordersCount', 'totalSpend', 'role',
+        'createdAt', 'updatedAt'
+      ])
+      && isValidOptionalString(data, 'uid', 1, 128)
+      && isValidOptionalString(data, 'name', 0, 100)
+      && (!('email' in data) || isValidEmail(data.email))
+      && isValidOptionalString(data, 'skinType', 0, 100)
+      && isValidOptionalString(data, 'photo', 0, 2000)
+      && isValidOptionalNumber(data, 'level', 1, 100)
+      && isValidOptionalString(data, 'levelName', 0, 100)
+      && isValidOptionalNumber(data, 'streak', 0, 10000)
+      && (!('tenure' in data) || data.tenure is string || data.tenure is number)
+      && isValidOptionalList(data, 'badges', 50)
+      && isValidOptionalNumber(data, 'ordersCount', 0, 1000000)
+      && isValidOptionalNumber(data, 'totalSpend', 0, 1000000000)
+      && isValidOptionalString(data, 'role', 1, 50)
+      && (!('createdAt' in data) || data.createdAt is timestamp || data.createdAt is string)
+      && (!('updatedAt' in data) || data.updatedAt is timestamp || data.updatedAt is string);
+    }
+
+    function isValidOrder(data) {
+      return hasOnlyAllowedFields([
+        'id', 'orderId', 'customerId', 'customerEmail', 'customer', 'items',
+        'totalAmount', 'total', 'subtotal', 'shipping', 'currency', 'status',
+        'achievement', 'date', 'createdAt', 'updatedAt'
+      ])
+      && hasRequiredFields(['items', 'status'])
+      && data.items is list && data.items.size() > 0 && data.items.size() <= 100
+      && (
+        ('totalAmount' in data && data.totalAmount is number && data.totalAmount > 0) ||
+        ('total' in data && data.total is number && data.total > 0)
+      )
+      && (!('currency' in data) || (data.currency is string && data.currency.size() >= 1 && data.currency.size() <= 10))
+      && (
+        ('customerEmail' in data && isValidEmail(data.customerEmail)) ||
+        ('customer' in data && data.customer is map && 'email' in data.customer && isValidEmail(data.customer.email)) ||
+        isAdmin()
+      )
+      && data.status in ['pending', 'paid', 'processing', 'shipped', 'fulfilled', 'cancelled', 'refunded']
+      && isValidOptionalString(data, 'id', 1, 100)
+      && isValidOptionalString(data, 'orderId', 1, 100)
+      && isValidOptionalString(data, 'customerId', 1, 128)
+      && isValidOptionalMap(data, 'customer', 20)
+      && isValidOptionalNumber(data, 'subtotal', 0, 1000000000)
+      && isValidOptionalNumber(data, 'shipping', 0, 1000000000)
+      && isValidOptionalMap(data, 'achievement', 10)
+      && isValidOptionalString(data, 'date', 0, 100)
+      && (!('createdAt' in data) || data.createdAt is timestamp || data.createdAt is string)
+      && (!('updatedAt' in data) || data.updatedAt is timestamp || data.updatedAt is string);
+    }
+
+    function isOrderCreator(data) {
+      return isAdmin() || (
+        isAuthenticated() && (
+          ('customerEmail' in data && data.customerEmail.lower() == request.auth.token.email.lower()) ||
+          ('customerId' in data && data.customerId == request.auth.uid) ||
+          ('customer' in data && data.customer is map && 'email' in data.customer && data.customer.email.lower() == request.auth.token.email.lower())
+        )
+      );
+    }
+
+    function isOrderOwner(data) {
+      return isAuthenticated() && (
+        ('customerEmail' in data && data.customerEmail.lower() == request.auth.token.email.lower()) ||
+        ('customerId' in data && data.customerId == request.auth.uid) ||
+        ('customer' in data && data.customer is map && 'email' in data.customer && data.customer.email.lower() == request.auth.token.email.lower())
+      );
+    }
+
+    // ===============================================================
+    // Rules Definitions by Collection
+    // ===============================================================
+
+    // 1. Active Store Settings
     match /store_settings/{document} {
-      allow read, write: if true;
+      allow read: if true;
+      allow create: if isAdmin() && isValidStoreSettings(request.resource.data);
+      allow update: if isAdmin() && isValidStoreSettings(request.resource.data);
+      allow delete: if isAdmin();
     }
 
-    // 2. Products catalog
+    // 2. Products Catalog
     match /products/{productId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow create: if isAdmin() && isValidProduct(request.resource.data);
+      allow update: if isAdmin() && isValidProduct(request.resource.data);
+      allow delete: if isAdmin();
     }
 
-    // 3. Customer reviews
+    // 3. Customer Reviews (Subcollection under products)
     match /reviews/{productId}/entries/{reviewId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow create: if isAuthenticated()
+        && request.resource.data.authorId == request.auth.uid
+        && isValidReview(request.resource.data)
+        && isRecent(request.resource.data.createdAt);
+      allow update: if isAuthenticated()
+        && (resource.data.authorId == request.auth.uid || isAdmin())
+        && isValidReview(request.resource.data)
+        && areImmutableFieldsUnchanged(['authorId', 'createdAt']);
+      allow delete: if isAuthenticated()
+        && (resource.data.authorId == request.auth.uid || isAdmin());
     }
 
-    // 4. User wishlists (cross-device routine sync)
+    // 4. User Wishlists (Routine synchronization)
     match /user_wishlists/{userEmail} {
-      allow read, write: if true;
+      allow read: if isEmailOwner(userEmail) || isAdmin();
+      allow create: if (isEmailOwner(userEmail) || isAdmin())
+        && isValidWishlist(request.resource.data);
+      allow update: if (isEmailOwner(userEmail) || isAdmin())
+        && isValidWishlist(request.resource.data);
+      allow delete: if isEmailOwner(userEmail) || isAdmin();
     }
 
-    // 5. User profiles, routine tenure, achievement streaks & badges
+    // 5. User Profiles (Keyed by Firebase Auth UID)
     match /users/{userId} {
-      allow read, write: if true;
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if (isOwner(userId) || isAdmin())
+        && isValidUserProfile(request.resource.data)
+        && uidUnchanged()
+        && canSetRole(request.resource.data);
+      allow update: if (isOwner(userId) || isAdmin())
+        && isValidUserProfile(request.resource.data)
+        && uidNotModified()
+        && canUpdateRole()
+        && areImmutableFieldsUnchanged(['createdAt']);
+      allow delete: if isOwner(userId) || isAdmin();
     }
+
+    // User Profiles (Keyed by normalized email)
     match /user_profiles/{userEmail} {
-      allow read, write: if true;
+      allow read: if isEmailOwner(userEmail) || isAdmin();
+      allow create: if (isEmailOwner(userEmail) || isAdmin())
+        && isValidUserProfile(request.resource.data)
+        && canSetRole(request.resource.data);
+      allow update: if (isEmailOwner(userEmail) || isAdmin())
+        && isValidUserProfile(request.resource.data)
+        && canUpdateRole()
+        && areImmutableFieldsUnchanged(['createdAt']);
+      allow delete: if isEmailOwner(userEmail) || isAdmin();
     }
 
     // 6. Orders
     match /orders/{orderId} {
-      allow read, write: if true;
+      allow read: if isAdmin() || isOrderOwner(resource.data);
+      allow create: if isAuthenticated()
+        && isValidOrder(request.resource.data)
+        && request.resource.data.status == 'pending'
+        && isOrderCreator(request.resource.data);
+      allow update: if isAdmin()
+        && isValidOrder(request.resource.data)
+        && areImmutableFieldsUnchanged(['id', 'orderId', 'customerId', 'createdAt']);
+      allow delete: if isAdmin();
     }
 
-    // 7. Fallback catch-all for any other store documents
+    // Maintenance notifications subscription
+    match /maintenance_subscribers/{subscriberId} {
+      allow create: if request.resource.data.keys().hasOnly(['email', 'subscribedAt'])
+        && request.resource.data.email is string
+        && isValidEmail(request.resource.data.email)
+        && request.resource.data.subscribedAt is timestamp;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // -------------------------------------------------------------
+    // 7. Catch-All Fallback: Deny all unmatched documents
+    // -------------------------------------------------------------
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
   }
 }

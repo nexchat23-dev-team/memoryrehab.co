@@ -1,5 +1,9 @@
 (async () => {
   const base = process.env.API_BASE || 'http://localhost:4000';
+  const adminHeaders = {
+    'Content-Type': 'application/json',
+    'x-admin-key': process.env.ADMIN_PASSKEY || 'lab2026'
+  };
 
   const settingsBefore = await (await fetch(base + '/api/settings')).json();
   console.log('SETTINGS_BEFORE', JSON.stringify(settingsBefore));
@@ -10,7 +14,7 @@
 
   const create = await fetch(base + '/api/products', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: adminHeaders,
     body: JSON.stringify({
       name: 'QA Test Product',
       step: 'Step 2: Target & Treat',
@@ -34,7 +38,7 @@
 
   const update = await fetch(base + '/api/products/' + created.id, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: adminHeaders,
     body: JSON.stringify({
       name: 'QA Test Product Updated',
       price: 110,
@@ -52,7 +56,7 @@
 
   const settingsUpdate = await fetch(base + '/api/settings', {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: adminHeaders,
     body: JSON.stringify({
       ...settingsBefore,
       promoCode: 'OWNERTEST',
@@ -68,13 +72,16 @@
   const settingsAfter = await (await fetch(base + '/api/settings')).json();
   console.log('SETTINGS_AFTER', JSON.stringify(settingsAfter));
 
-  const del = await fetch(base + '/api/products/' + created.id, { method: 'DELETE' });
+  const del = await fetch(base + '/api/products/' + created.id, {
+    method: 'DELETE',
+    headers: adminHeaders
+  });
   console.log('DELETE_STATUS', del.status);
   console.log('DELETE_BODY', await del.text());
 
   const restore = await fetch(base + '/api/settings', {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: adminHeaders,
     body: JSON.stringify(settingsBefore)
   });
 
