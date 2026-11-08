@@ -58,6 +58,24 @@
   --section-spacing-y: clamp(64px, 7vw, 96px);
   --section-spacing-y-mobile: 48px;
   --transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.22s ease;
+
+  /* Stacking Scale Tokens (Z-Index Hierarchy) */
+  --z-background: 0;
+  --z-base: 1;
+  --z-header: 100;
+  --z-bottom-nav: 800;
+  --z-floating: 890;
+  --z-toast: 950;
+  --z-drawer-backdrop: 1800;
+  --z-drawer: 1810;
+  --z-cart-backdrop: 2000;
+  --z-cart-drawer: 2010;
+  --z-modal-backdrop: 2100;
+  --z-modal: 2110;
+  --z-checkout-modal: 2500;
+  --z-toast-alert: 3000;
+  --z-confetti: 3100;
+  --z-critical: 99999;
 }
 
 /* Android / Mobile improvements */
@@ -142,4 +160,21 @@ img, picture, video {
   --shadow-lg: 0 28px 70px rgba(0, 0, 0, 0.8);
   --shadow-xl: 0 36px 84px rgba(0, 0, 0, 0.88);
   --shadow-glow: 0 8px 35px rgba(244, 114, 182, 0.42);
+}
+
+/* Fallback for browsers/devices without backdrop-filter support */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  :root {
+    --glass-bg: rgba(255, 247, 250, 0.96);
+    --glass-bg-hover: #ffffff;
+    --glass-card: rgba(255, 255, 255, 0.96);
+    --glass-card-hover: #ffffff;
+  }
+  [data-theme="dark"],
+  .dark-mode {
+    --glass-bg: rgba(18, 22, 34, 0.96);
+    --glass-bg-hover: rgba(25, 31, 48, 0.98);
+    --glass-card: rgba(18, 23, 36, 0.96);
+    --glass-card-hover: rgba(25, 32, 51, 0.98);
+  }
 }

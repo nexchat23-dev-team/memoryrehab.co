@@ -11,7 +11,7 @@
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
-  z-index: 2000;
+  z-index: var(--z-cart-backdrop, 2000) !important;
 }
 
 .cart-drawer-backdrop.open {
@@ -34,7 +34,7 @@
   box-shadow: -15px 0 50px rgba(0, 0, 0, 0.25);
   transform: translateX(100%);
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s ease;
-  z-index: 2001;
+  z-index: var(--z-cart-drawer, 2010) !important;
   display: flex;
   flex-direction: column;
   visibility: hidden;

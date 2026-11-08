@@ -2,7 +2,7 @@
 <html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title id="pageTitle">Product Detail | Memory Rehab Lab</title>
     <meta
       name="description"
@@ -628,6 +628,75 @@
         </button>
       </div>
     </aside>
+
+    <!-- CHECKOUT & SHIPPING MODAL -->
+    <div id="checkoutModal" class="modal-backdrop" style="display:none; z-index:10008;">
+      <div class="modal-card" style="max-width:480px;">
+        <button id="checkoutCloseBtn" class="modal-close" type="button" aria-label="Close checkout">✕</button>
+        <div class="admin-badge" style="margin-bottom:6px;">Direct Laboratory Dispatch</div>
+        <h3 style="margin-top:4px;">Checkout — Delivery &amp; Order Confirmation</h3>
+        
+        <div style="margin-top:12px;">
+          <label for="checkoutName" style="font-size:0.8rem; font-weight:700; color:var(--text-main); display:block; margin-bottom:4px;">Full Name</label>
+          <input id="checkoutName" type="text" placeholder="e.g. Baha Alex" class="admin-input" autocomplete="name" />
+        </div>
+
+        <div style="margin-top:10px;">
+          <label for="checkoutPhone" style="font-size:0.8rem; font-weight:700; color:var(--text-main); display:block; margin-bottom:4px;">Phone / WhatsApp</label>
+          <input id="checkoutPhone" type="tel" placeholder="e.g. 08012345678" class="admin-input" autocomplete="tel" />
+        </div>
+
+        <div style="margin-top:10px;">
+          <label for="checkoutCountry" style="font-size:0.8rem; font-weight:700; color:var(--text-main); display:block; margin-bottom:4px;">Shipping Country</label>
+          <select id="checkoutCountry" class="admin-input">
+            <option value="NG" selected>Nigeria (Nationwide Express)</option>
+            <option value="US">United States (DHL International)</option>
+            <option value="GB">United Kingdom (DHL International)</option>
+            <option value="OTHER">Other (International)</option>
+          </select>
+        </div>
+
+        <div style="margin-top:10px;">
+          <label for="checkoutAddress" style="font-size:0.8rem; font-weight:700; color:var(--text-main); display:block; margin-bottom:4px;">Delivery Address &amp; City</label>
+          <input id="checkoutAddress" type="text" placeholder="Street, Area, City, State" class="admin-input" autocomplete="street-address" />
+        </div>
+
+        <div style="margin-top:10px;">
+          <label for="checkoutEmail" style="font-size:0.8rem; font-weight:700; color:var(--text-main); display:block; margin-bottom:4px;">Email (For digital receipt &amp; tracking)</label>
+          <input id="checkoutEmail" type="email" placeholder="you@domain.com" class="admin-input" autocomplete="email" />
+        </div>
+
+        <div style="background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:12px; padding:12px 14px; margin-top:14px;">
+          <div style="display:flex;justify-content:space-between; font-size:0.9rem;">
+            <span style="color:var(--text-muted);">Subtotal:</span>
+            <strong id="checkoutSubtotal">₦0</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between; font-size:0.9rem; margin-top:4px;">
+            <span style="color:var(--text-muted);">Shipping:</span>
+            <span id="checkoutShippingCost" style="font-weight:700; color:var(--success);">₦0</span>
+          </div>
+          <hr style="border:none; border-top:1px solid var(--glass-border-subtle); margin:8px 0;" />
+          <div style="display:flex;justify-content:space-between;font-weight:800;font-size:1.1rem; color:var(--text-main);">
+            <span>Total:</span>
+            <span id="checkoutTotalDisplay">₦0</span>
+          </div>
+        </div>
+
+        <div style="margin-top:16px; display:flex; flex-direction:column; gap:10px;">
+          <button id="checkoutWhatsAppBtn" type="button" class="btn-primary" style="background:#25d366; border-color:#25d366; color:#fff; display:flex; align-items:center; justify-content:center; gap:8px; padding:12px 18px; font-weight:700; border-radius:var(--radius-full, 9999px); box-shadow:0 4px 16px rgba(37,211,102,0.35); cursor:pointer;">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.65 3.742-.983z"/></svg>
+            <span>Instant Order via WhatsApp</span>
+          </button>
+          <button id="checkoutPayBtn" type="button" class="btn-secondary" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:11px 18px; border-radius:var(--radius-full, 9999px); font-weight:600; cursor:pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            <span>Pay with Card / Flutterwave</span>
+          </button>
+          <button id="checkoutCancelBtn" type="button" style="background:transparent; border:none; color:var(--text-muted); font-size:0.8rem; cursor:pointer; padding:4px;">
+            Return to Bag
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- ORDER CONFIRMATION & CELEBRATION MODAL -->
     <div id="orderSuccessModal" class="modal-backdrop" style="display:none; z-index:10010;">

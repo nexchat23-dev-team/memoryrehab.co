@@ -355,7 +355,8 @@
       card.addEventListener('mouseenter', function () {
         isHovering = true;
         rect = card.getBoundingClientRect();
-        card.style.transition = 'transform 0.15s ease-out, box-shadow 0.25s ease';
+        card.style.willChange = 'transform';
+        card.style.transition = 'box-shadow 0.25s ease';
       }, { passive: true });
 
       card.addEventListener('mousemove', function (e) {
@@ -388,6 +389,7 @@
           cancelAnimationFrame(rafId);
           rafId = null;
         }
+        card.style.willChange = 'auto';
         card.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease';
         card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) translateY(0)';
       }, { passive: true });
@@ -627,7 +629,7 @@
         addBtn.onclick = function () {
           matchedProducts.forEach(function (prod) {
             if (typeof window.addToCart === 'function') {
-              window.addToCart(prod.id, prod.name, Number(prod.price), prod.image);
+              window.addToCart({ id: prod.id, name: prod.name, price: Number(prod.price), image: prod.image, size: prod.size || '30ml' }, 1);
             }
           });
           closeQuiz();

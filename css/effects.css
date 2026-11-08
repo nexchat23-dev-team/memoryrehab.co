@@ -64,8 +64,10 @@
 .hero-glass-card,
 .bundle-step-card,
 .ritual-card {
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease !important;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
   transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   position: relative;
   overflow: hidden;
 }
@@ -540,7 +542,8 @@
   align-items: center;
   gap: 12px;
   max-width: 360px;
-  width: calc(100vw - 48px);
+  width: min(360px, calc(100% - 32px));
+  box-sizing: border-box;
   transform: translateY(120px) scale(0.95);
   opacity: 0;
   visibility: hidden;
@@ -614,10 +617,10 @@
 .confetti-canvas {
   position: fixed;
   inset: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  z-index: 10030 !important;
+  z-index: var(--z-confetti, 3100) !important;
 }
 
 /* 7B. GAMIFIED ACHIEVEMENT STREAK & LEVEL SYSTEM */

@@ -814,7 +814,7 @@ function initWishlistPage() {
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                 </svg>
               </button>
-              <a href="product.html?id=${p.id}"><img src="${p.image}" alt="${p.name}" loading="lazy" /></a>
+              <a href="product.html?id=${p.id}"><img src="${p.image}" alt="${p.name}" width="400" height="300" loading="lazy" /></a>
             </div>
             <div class="card-content-wrap">
               <h3 class="card-title"><a href="product.html?id=${p.id}">${p.name}</a></h3>
@@ -1212,9 +1212,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function loadPersistedCart() {
     try {
       const raw = localStorage.getItem('mr_cart');
-      if (raw) {
+      if (raw !== null) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           return parsed.map((item) => {
             if (Number(item.price) <= 100) item.price = 42000;
             return item;
@@ -1222,16 +1222,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     } catch (e) {}
-    return [
-      {
-        id: '1',
-        name: 'Faerie Dew™ Barrier Face Cream',
-        price: 42000,
-        image: 'photo_2026-09-09_17-33-58.jpg',
-        size: '30ml',
-        quantity: 1
-      }
-    ];
+    return [];
   }
 
   let cart = loadPersistedCart();
@@ -1305,7 +1296,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function openCart() {
     const d = document.getElementById('cartDrawer') || cartDrawer;
     const b = document.getElementById('cartBackdrop') || cartBackdrop;
-    if (d) d.classList.add('open');
+    if (!d) return;
+    d.classList.add('open');
     if (b) b.classList.add('open');
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
@@ -1488,6 +1480,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function addToCart(product, qty = 1) {
+    if (typeof product !== 'object' || product === null) {
+      const name = arguments[1] || 'Clinical Formulation';
+      const price = arguments[2] || 0;
+      const image = arguments[3] || 'brand-logo-light.png';
+      const size = arguments[4] || '30ml';
+      product = { id: String(product), name: String(name), price: Number(price), image: String(image), size: String(size) };
+      qty = 1;
+    }
     let normalizedPrice = Number(product.price || 0);
     if (normalizedPrice > 0 && normalizedPrice <= 100) normalizedPrice = normalizedPrice * 1000;
     const existing = cart.find((i) => i.id === product.id || i.name === product.name);
@@ -2808,7 +2808,7 @@ function hydrateStorefrontCatalog() {
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
               </svg>
             </button>
-            <img src="${p.image || 'photo_2026-09-09_17-33-58.jpg'}" alt="${p.name || ''}" loading="lazy" />
+            <img src="${p.image || 'photo_2026-09-09_17-33-58.jpg'}" alt="${p.name || ''}" width="400" height="300" loading="lazy" />
             <button class="card-quick-view-btn" type="button">Quick View</button>
           </div>
           <div class="card-content-wrap">

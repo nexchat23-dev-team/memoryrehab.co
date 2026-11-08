@@ -2,18 +2,18 @@
    HERO SECTION — 100vw FULL-BLEED TAKEOVER (ZERO SIDE SPACES)
    ========================================================================== */
 
-/* Outer Hero Container: Breaks out of any container to 100vw */
+/* Outer Hero Container: Clean 100% full-width takeover without 100vw scrollbar overflow leak */
 .hero-fullbleed-wrapper {
-  width: 100vw !important;
-  max-width: 100vw !important;
-  margin-left: calc(50% - 50vw) !important;
-  margin-right: calc(50% - 50vw) !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
   padding: 0 0 54px !important;
   margin-top: 0 !important;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  overflow-x: hidden;
+  overflow-x: clip;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
