@@ -623,7 +623,7 @@
 /* Global overflow prevention — critical for mobile */
 html, body {
   overflow-x: hidden;
-  max-width: 100vw;
+  max-width: 100%;
 }
 
 /* Deeper ritual section mobile fix */
@@ -1386,7 +1386,8 @@ html, body {
 @media (max-width: 900px) {
   html, body {
     overflow-x: hidden !important;
-    max-width: 100vw !important;
+    max-width: 100% !important;
+    width: 100% !important;
   }
 
   /* Every block element respects the viewport */

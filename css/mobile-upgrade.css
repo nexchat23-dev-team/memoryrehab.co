@@ -527,6 +527,13 @@ html {
     top: 8px !important;
     right: 8px !important;
     border-radius: 50% !important;
+    position: absolute !important;
+  }
+  .card-wishlist-btn::after {
+    content: '' !important;
+    position: absolute !important;
+    inset: -6px !important;
+    border-radius: 50% !important;
   }
   .card-wishlist-btn svg {
     width: 15px !important;

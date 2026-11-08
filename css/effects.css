@@ -427,7 +427,7 @@
   border: 1.5px solid var(--border-subtle, #e2e8f0);
   cursor: pointer;
   text-align: left;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
   font-family: inherit;
   width: 100%;
 }
@@ -1114,7 +1114,7 @@ body.wireframe-mode::after {
 /* Botanical Mist ASMR Toggle Pulse */
 .mist-toggle-btn {
   font-size: 1.05rem;
-  transition: all 0.25s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease, background-color 0.25s ease;
 }
 .mist-toggle-btn img.mist-favicon {
   width: 18px;
