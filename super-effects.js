@@ -313,17 +313,26 @@
     const bar = document.getElementById('scrollProgressBar');
     if (!bar) return;
 
+    let ticking = false;
     function update() {
       const scrollY = window.pageYOffset || document.documentElement.scrollTop;
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       if (maxScroll > 0) {
         const pct = Math.min(100, Math.max(0, (scrollY / maxScroll) * 100));
-        bar.style.width = pct + '%';
+        bar.style.width = pct.toFixed(1) + '%';
+      }
+      ticking = false;
+    }
+
+    function onScroll() {
+      if (!ticking) {
+        requestAnimationFrame(update);
+        ticking = true;
       }
     }
 
-    window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
     update();
   }
 
@@ -340,34 +349,48 @@
 
     cards.forEach(function (card) {
       let isHovering = false;
+      let rect = null;
+      let rafId = null;
 
       card.addEventListener('mouseenter', function () {
         isHovering = true;
+        rect = card.getBoundingClientRect();
         card.style.transition = 'transform 0.15s ease-out, box-shadow 0.25s ease';
-      });
+      }, { passive: true });
 
       card.addEventListener('mousemove', function (e) {
-        if (!isHovering) return;
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
+        if (!isHovering || !rect) return;
+        if (rafId) return; // Throttle to display refresh rate
+        const clientX = e.clientX;
+        const clientY = e.clientY;
 
-        const rotateX = ((y - centerY) / centerY) * -6; // Max 6 deg
-        const rotateY = ((x - centerX) / centerX) * 6;  // Max 6 deg
+        rafId = requestAnimationFrame(function () {
+          rafId = null;
+          if (!isHovering || !rect) return;
+          const x = clientX - rect.left;
+          const y = clientY - rect.top;
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
 
-        card.style.setProperty('--mouse-x', x + 'px');
-        card.style.setProperty('--mouse-y', y + 'px');
+          const rotateX = ((y - centerY) / centerY) * -5;
+          const rotateY = ((x - centerX) / centerX) * 5;
 
-        card.style.transform = `perspective(900px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-4px)`;
-      });
+          card.style.setProperty('--mouse-x', x.toFixed(1) + 'px');
+          card.style.setProperty('--mouse-y', y.toFixed(1) + 'px');
+          card.style.transform = `perspective(900px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-4px)`;
+        });
+      }, { passive: true });
 
       card.addEventListener('mouseleave', function () {
         isHovering = false;
+        rect = null;
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
         card.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease';
         card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) translateY(0)';
-      });
+      }, { passive: true });
     });
   }
 
@@ -884,25 +907,35 @@
      Real-time dynamic chromatic dispersion reacting to pointer & gyro
      ============================================================ */
   function initHoloFoil() {
-    let lastUpdate = 0;
-    function updateAngle(clientX, clientY) {
-      const now = performance.now();
-      if (now - lastUpdate < 16) return; // ~60fps throttle
-      lastUpdate = now;
+    const foils = document.querySelectorAll('.holo-foil');
+    if (!foils.length) return;
 
+    let rafId = null;
+    let pendingX = 0;
+    let pendingY = 0;
+
+    function renderHolo() {
+      rafId = null;
       const w = window.innerWidth || 1200;
       const h = window.innerHeight || 800;
-      const xPct = Math.round((clientX / w) * 100);
-      const yPct = Math.round((clientY / h) * 100);
-      const angle = Math.round((clientX / w) * 360);
+      const xPct = Math.round((pendingX / w) * 100);
+      const yPct = Math.round((pendingY / h) * 100);
+      const angle = Math.round((pendingX / w) * 360);
 
-      document.documentElement.style.setProperty('--holo-angle', angle + 'deg');
-      document.documentElement.style.setProperty('--holo-x', xPct + '%');
-      document.documentElement.style.setProperty('--holo-y', yPct + '%');
+      for (let i = 0; i < foils.length; i++) {
+        const el = foils[i];
+        el.style.setProperty('--holo-angle', angle + 'deg');
+        el.style.setProperty('--holo-x', xPct + '%');
+        el.style.setProperty('--holo-y', yPct + '%');
+      }
     }
 
     window.addEventListener('pointermove', function (e) {
-      updateAngle(e.clientX, e.clientY);
+      pendingX = e.clientX;
+      pendingY = e.clientY;
+      if (!rafId) {
+        rafId = requestAnimationFrame(renderHolo);
+      }
     }, { passive: true });
 
     // Gyroscope tilt on mobile devices
@@ -911,7 +944,9 @@
         if (e.gamma !== null) {
           const normGamma = Math.min(1, Math.max(-1, e.gamma / 45));
           const angle = Math.round(((normGamma + 1) / 2) * 360);
-          document.documentElement.style.setProperty('--holo-angle', angle + 'deg');
+          for (let i = 0; i < foils.length; i++) {
+            foils[i].style.setProperty('--holo-angle', angle + 'deg');
+          }
         }
       }, { passive: true });
     }
@@ -938,10 +973,12 @@
 
     let activeTarget = null;
     let targetRect = null;
+    let loupeRaf = null;
     const zoomLevel = 2.5;
 
     function activateLoupe(target, e) {
       activeTarget = target;
+      targetRect = activeTarget.getBoundingClientRect();
       const img = target.tagName.toLowerCase() === 'img' ? target : target.querySelector('img');
       if (!img) return;
 
@@ -959,31 +996,40 @@
     function deactivateLoupe() {
       loupe.classList.remove('active');
       activeTarget = null;
+      targetRect = null;
+      if (loupeRaf) {
+        cancelAnimationFrame(loupeRaf);
+        loupeRaf = null;
+      }
     }
 
     function updateLoupe(e) {
-      if (!activeTarget) return;
-      targetRect = activeTarget.getBoundingClientRect();
-
+      if (!activeTarget || !targetRect) return;
       const x = e.clientX;
       const y = e.clientY;
 
-      // Center loupe on cursor
-      loupe.style.left = x + 'px';
-      loupe.style.top = y + 'px';
+      if (loupeRaf) return;
+      loupeRaf = requestAnimationFrame(function () {
+        loupeRaf = null;
+        if (!activeTarget || !targetRect) return;
 
-      // Relative coordinates in image
-      const relX = x - targetRect.left;
-      const relY = y - targetRect.top;
+        // Center loupe on cursor
+        loupe.style.left = x + 'px';
+        loupe.style.top = y + 'px';
 
-      const bgWidth = targetRect.width * zoomLevel;
-      const bgHeight = targetRect.height * zoomLevel;
+        // Relative coordinates in image
+        const relX = x - targetRect.left;
+        const relY = y - targetRect.top;
 
-      const bgX = -(relX * zoomLevel - loupe.offsetWidth / 2);
-      const bgY = -(relY * zoomLevel - loupe.offsetHeight / 2);
+        const bgWidth = targetRect.width * zoomLevel;
+        const bgHeight = targetRect.height * zoomLevel;
 
-      loupe.style.backgroundSize = bgWidth + 'px ' + bgHeight + 'px';
-      loupe.style.backgroundPosition = bgX + 'px ' + bgY + 'px';
+        const bgX = -(relX * zoomLevel - (loupe.offsetWidth || 140) / 2);
+        const bgY = -(relY * zoomLevel - (loupe.offsetHeight || 140) / 2);
+
+        loupe.style.backgroundSize = bgWidth + 'px ' + bgHeight + 'px';
+        loupe.style.backgroundPosition = bgX + 'px ' + bgY + 'px';
+      });
     }
 
     document.addEventListener('pointerover', function (e) {
@@ -991,13 +1037,13 @@
       if (target) {
         activateLoupe(target, e);
       }
-    });
+    }, { passive: true });
 
     document.addEventListener('pointerout', function (e) {
       if (activeTarget && !e.relatedTarget?.closest('[data-loupe="true"], .loupe-target')) {
         deactivateLoupe();
       }
-    });
+    }, { passive: true });
 
     window.addEventListener('pointermove', function (e) {
       if (activeTarget) {

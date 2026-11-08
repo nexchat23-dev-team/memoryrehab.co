@@ -474,8 +474,8 @@ function initAutoThemeScheduler(config) {
   }, intervalMs);
 }
 
-// ── Paystack Redirect Verification Handler ──
-function checkPaystackRedirect() {
+// ── Payment Redirect Handler ──
+function checkPaymentRedirect() {
   const params = new URLSearchParams(window.location.search);
   const status = params.get('payment');
   const reference = params.get('reference');
@@ -498,7 +498,7 @@ function checkPaystackRedirect() {
   }
 }
 
-window.addEventListener('load', checkPaystackRedirect);
+window.addEventListener('load', checkPaymentRedirect);
 
 /**
  * Execute one cycle step according to active mode
@@ -1345,12 +1345,25 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function updateCartBadge() {
-    if (!cartCount) return;
     const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-    cartCount.textContent = totalCount;
-    cartCount.classList.remove('bump');
-    void cartCount.offsetWidth;
-    cartCount.classList.add('bump');
+    if (cartCount) {
+      cartCount.textContent = totalCount;
+      cartCount.classList.remove('bump');
+      requestAnimationFrame(() => cartCount.classList.add('bump'));
+    }
+    const mobBadges = [
+      document.getElementById('mobCartCount'),
+      document.getElementById('pdpMobCartCount'),
+      document.getElementById('cartCountBadge')
+    ];
+    for (let i = 0; i < mobBadges.length; i++) {
+      const b = mobBadges[i];
+      if (b) {
+        b.textContent = String(totalCount);
+        b.style.display = totalCount > 0 ? 'flex' : 'none';
+      }
+    }
+    window.dispatchEvent(new CustomEvent('mr:cart-updated', { detail: { count: totalCount } }));
   }
 
   // formatCurrency is defined at module scope (above DOMContentLoaded) so it
@@ -1941,17 +1954,17 @@ document.addEventListener('DOMContentLoaded', () => {
     completeOrderFlow({ method: 'whatsapp' });
   });
 
-  // Pay Online (Card / Paystack) with seamless WhatsApp Concierge fallback
+  // Pay Online (Card / Flutterwave) with seamless WhatsApp Concierge fallback
   checkoutPayBtn?.addEventListener('click', async () => {
     if (cart.length === 0) { showToast('Your bag is empty!', '⚠️'); return; }
     const subtotal = cart.reduce((s, it) => s + Number(it.price) * it.quantity, 0);
     const total = subtotal + activeShippingCost;
     const email = (checkoutEmail && checkoutEmail.value.trim()) || '';
 
-    // If customer entered email and Paystack is live, attempt initiation
+    // If customer entered email and Flutterwave is configured, attempt initiation
     if (email) {
       try {
-        const resp = await fetch('/api/payments/initiate', {
+        const resp = await fetch('/api/payments/flutterwave/initiate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ amount: total, email })
@@ -1966,7 +1979,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (e) { /* API unavailable — fall through seamlessly */ }
     }
 
-    // Paystack is not yet configured or failed: seamlessly fallback to WhatsApp Order with full details and confetti!
+    // Flutterwave is not configured or failed: fall back to WhatsApp ordering.
     showToast('Connecting you to WhatsApp Concierge for instant confirmation & dispatch...', '✦');
     completeOrderFlow({ method: 'whatsapp' });
   });
@@ -2421,9 +2434,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof firebase === 'undefined' || typeof firebase.firestore !== 'function') return;
 
     try {
+      if (typeof firebase.firestore.setLogLevel === 'function') {
+        firebase.firestore.setLogLevel('error');
+      }
+
       const db = firebase.firestore();
       try {
-        db.settings({ experimentalForceLongPolling: true, merge: true });
+        if (typeof db.enablePersistence === 'function') {
+          db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+        }
       } catch(e) {}
 
       // Listen to store announcements & promos + theme colours

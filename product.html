@@ -231,7 +231,7 @@
         <!-- Gallery Showcase -->
         <div class="pdp-gallery-wrap">
           <div class="pdp-main-img-box">
-            <img id="pdpMainImg" src="" alt="Product Image" style="transition: opacity 0.2s ease;" />
+            <img id="pdpMainImg" src="" alt="Product Image" width="600" height="600" fetchpriority="high" decoding="async" style="transition: opacity 0.2s ease;" />
           </div>
         </div>
 
@@ -704,9 +704,14 @@
         if (!firebase.apps.length) {
           firebase.initializeApp(firebaseConfig);
         }
+        if (typeof firebase.firestore.setLogLevel === 'function') {
+          firebase.firestore.setLogLevel('error');
+        }
         db = firebase.firestore();
         try {
-          db.settings({ experimentalForceLongPolling: true, merge: true });
+          if (typeof db.enablePersistence === 'function') {
+            db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+          }
         } catch(e) {}
         firebaseReady = true;
       } catch (err) {
@@ -972,7 +977,7 @@
             mobBadge.style.display = val > 0 ? 'flex' : 'none';
           }
         }
-        setInterval(syncCartCount, 600);
+        window.addEventListener('mr:cart-updated', syncCartCount);
         syncCartCount();
       })();
     </script>

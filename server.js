@@ -2,6 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+const { randomUUID } = require('crypto');
 const { put } = require('@vercel/blob');
 require('dotenv').config();
 
@@ -449,7 +450,7 @@ async function handleRequest(req, res) {
     return sendJson(res, 401, { ok: false, error: 'Invalid passkey' });
   }
 
-  // ── Paystack Payment Endpoints ──
+  // ── Flutterwave Payment Endpoints ──
   if (pathname === '/api/shipping/rates' && req.method === 'POST') {
     const body = await parseJsonBody(req);
     const subtotal = Number(body.amount || body.subtotal || 0);
@@ -470,6 +471,85 @@ async function handleRequest(req, res) {
       subtotal,
       total: Number((subtotal + Number(quote.amount || 0)).toFixed(2))
     });
+  }
+
+  if (pathname === '/api/payments/flutterwave/initiate' && req.method === 'POST') {
+    const body = await parseJsonBody(req);
+    const amount = Number(body.amount || 0);
+    const email = (body.email || '').trim();
+
+    if (!amount || amount <= 0 || !email) {
+      return sendJson(res, 400, { ok: false, error: 'Invalid amount or email' });
+    }
+
+    const flutterwaveSecret = process.env.FLW_SECRET_KEY || process.env.FLUTTERWAVE_SECRET_KEY;
+    if (!flutterwaveSecret) return sendJson(res, 500, { ok: false, error: 'Payment gateway not configured' });
+
+    try {
+      const currency = (process.env.FLW_CURRENCY || 'NGN').toUpperCase();
+      const forwardedProtocol = req.headers['x-forwarded-proto'];
+      const protocol = forwardedProtocol
+        ? forwardedProtocol.split(',')[0].trim()
+        : ((req.headers.host || '').startsWith('localhost') ? 'http' : 'https');
+      const callbackUrl = process.env.FLW_CALLBACK_URL || `${protocol}://${req.headers.host}/api/payments/flutterwave/callback`;
+      const txRef = `mrl-${randomUUID()}`;
+      const resp = await fetch('https://api.flutterwave.com/v3/payments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${flutterwaveSecret}`
+        },
+        body: JSON.stringify({
+          tx_ref: txRef,
+          amount,
+          currency,
+          redirect_url: callbackUrl,
+          customer: { email },
+          customizations: { title: defaultStore.settings.storeName }
+        })
+      });
+      const data = await resp.json();
+      const paymentLink = data?.data?.link;
+      if (!resp.ok || data?.status !== 'success' || !paymentLink) {
+        console.warn('Flutterwave init rejected:', data?.message || resp.statusText);
+        return sendJson(res, 502, { ok: false, error: 'Could not start payment' });
+      }
+      return sendJson(res, 200, { ok: true, data: { authorization_url: paymentLink, tx_ref: txRef } });
+    } catch (err) {
+      console.warn('Flutterwave init error:', err.message);
+      return sendJson(res, 502, { ok: false, error: 'Payment gateway error' });
+    }
+  }
+
+  if (pathname === '/api/payments/flutterwave/callback' && req.method === 'GET') {
+    const transactionId = parsedUrl.query.transaction_id;
+    const txRef = parsedUrl.query.tx_ref;
+    const status = parsedUrl.query.status;
+    const flutterwaveSecret = process.env.FLW_SECRET_KEY || process.env.FLUTTERWAVE_SECRET_KEY;
+    if (!transactionId || !txRef || status !== 'successful' || !flutterwaveSecret) {
+      res.writeHead(302, { Location: '/?payment=failed' });
+      return res.end();
+    }
+
+    try {
+      const resp = await fetch(`https://api.flutterwave.com/v3/transactions/${encodeURIComponent(transactionId)}/verify`, {
+        headers: { 'Authorization': `Bearer ${flutterwaveSecret}` }
+      });
+      const result = await resp.json();
+      const transaction = result?.data;
+      const currency = (process.env.FLW_CURRENCY || 'NGN').toUpperCase();
+      const verified = resp.ok && result?.status === 'success'
+        && transaction?.status === 'successful'
+        && transaction?.tx_ref === txRef
+        && String(transaction?.currency || '').toUpperCase() === currency;
+      const paymentStatus = verified ? 'success' : 'failed';
+      res.writeHead(302, { Location: `/?payment=${paymentStatus}&reference=${encodeURIComponent(txRef)}` });
+      return res.end();
+    } catch (err) {
+      console.warn('Flutterwave callback verify error:', err.message);
+      res.writeHead(302, { Location: '/?payment=failed' });
+      return res.end();
+    }
   }
 
   if (pathname === '/api/payments/initiate' && req.method === 'POST') {
