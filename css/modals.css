@@ -209,7 +209,10 @@
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  z-index: 10008;
+  z-index: 2500 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
   display: grid;
   place-items: center;
   padding: 20px;
@@ -217,7 +220,7 @@
 }
 
 #orderSuccessModal {
-  z-index: 10015;
+  z-index: 2510 !important;
 }
 
 .modal-card {

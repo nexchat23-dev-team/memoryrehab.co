@@ -314,12 +314,18 @@
     if (!bar) return;
 
     let ticking = false;
+    let maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+
+    function measure() {
+      maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      onScroll();
+    }
+
     function update() {
       const scrollY = window.pageYOffset || document.documentElement.scrollTop;
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       if (maxScroll > 0) {
-        const pct = Math.min(100, Math.max(0, (scrollY / maxScroll) * 100));
-        bar.style.width = pct.toFixed(1) + '%';
+        const ratio = Math.min(1, Math.max(0, scrollY / maxScroll));
+        bar.style.transform = `scaleX(${ratio.toFixed(4)})`;
       }
       ticking = false;
     }
@@ -332,7 +338,8 @@
     }
 
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
+    window.addEventListener('resize', measure, { passive: true });
+    window.addEventListener('load', measure, { passive: true });
     update();
   }
 
@@ -410,6 +417,9 @@
 
     let isDragging = false;
     let positionPct = 50;
+    let cachedRect = null;
+    let dragRafId = null;
+    let pendingClientX = null;
 
     function setPosition(pct) {
       positionPct = Math.min(100, Math.max(0, pct));
@@ -419,37 +429,53 @@
       handleBtn.setAttribute('aria-valuenow', Math.round(positionPct));
     }
 
-    function handleMove(clientX) {
-      const rect = container.getBoundingClientRect();
-      const x = clientX - rect.left;
-      const pct = (x / rect.width) * 100;
+    function applyPendingMove() {
+      dragRafId = null;
+      if (pendingClientX === null || !cachedRect || cachedRect.width <= 0) return;
+      const x = pendingClientX - cachedRect.left;
+      const pct = (x / cachedRect.width) * 100;
       setPosition(pct);
+    }
+
+    function scheduleMove(clientX) {
+      pendingClientX = clientX;
+      if (!dragRafId) {
+        dragRafId = requestAnimationFrame(applyPendingMove);
+      }
     }
 
     function onPointerDown(e) {
       curtain.style.transition = '';
+      curtain.style.willChange = 'clip-path';
       handleLine.style.transition = '';
       handleBtn.style.transition = '';
+      cachedRect = container.getBoundingClientRect();
       isDragging = true;
       const clientX = e.clientX ?? (e.touches && e.touches[0] && e.touches[0].clientX);
-      if (clientX !== undefined) handleMove(clientX);
+      if (clientX !== undefined) scheduleMove(clientX);
       SoundFX.playClick();
     }
 
     function onPointerMove(e) {
       if (!isDragging) return;
       const clientX = e.clientX ?? (e.touches && e.touches[0] && e.touches[0].clientX);
-      if (clientX !== undefined) handleMove(clientX);
+      if (clientX !== undefined) scheduleMove(clientX);
     }
 
     function onPointerUp() {
       isDragging = false;
+      curtain.style.willChange = 'auto';
+      cachedRect = null;
+      if (dragRafId) {
+        cancelAnimationFrame(dragRafId);
+        dragRafId = null;
+      }
     }
 
     // Mouse listeners
     container.addEventListener('mousedown', onPointerDown);
-    window.addEventListener('mousemove', onPointerMove);
-    window.addEventListener('mouseup', onPointerUp);
+    window.addEventListener('mousemove', onPointerMove, { passive: true });
+    window.addEventListener('mouseup', onPointerUp, { passive: true });
 
     // Touch listeners
     container.addEventListener('touchstart', onPointerDown, { passive: true });
@@ -864,7 +890,7 @@
     let hasCelebrated = false;
     const observer = new MutationObserver(function () {
       const shippingText = document.getElementById('shippingGoalText');
-      if (shippingText && shippingText.textContent.includes('You qualify for FREE express shipping!')) {
+      if (shippingText && (shippingText.textContent.includes('Complimentary Express Shipping Unlocked') || shippingText.textContent.includes('FREE express shipping'))) {
         if (!hasCelebrated) {
           hasCelebrated = true;
           SoundFX.playCelebration();
@@ -909,6 +935,11 @@
      Real-time dynamic chromatic dispersion reacting to pointer & gyro
      ============================================================ */
   function initHoloFoil() {
+    // Disable on touch/mobile devices to prevent 60-100Hz gyroscope & swipe style recalculations
+    if ((window.matchMedia && window.matchMedia('(hover: none), (pointer: coarse), (max-width: 900px)').matches)) {
+      return;
+    }
+
     const foils = document.querySelectorAll('.holo-foil');
     if (!foils.length) return;
 
@@ -939,19 +970,6 @@
         rafId = requestAnimationFrame(renderHolo);
       }
     }, { passive: true });
-
-    // Gyroscope tilt on mobile devices
-    if (window.DeviceOrientationEvent) {
-      window.addEventListener('deviceorientation', function (e) {
-        if (e.gamma !== null) {
-          const normGamma = Math.min(1, Math.max(-1, e.gamma / 45));
-          const angle = Math.round(((normGamma + 1) / 2) * 360);
-          for (let i = 0; i < foils.length; i++) {
-            foils[i].style.setProperty('--holo-angle', angle + 'deg');
-          }
-        }
-      }, { passive: true });
-    }
   }
 
   /* ============================================================

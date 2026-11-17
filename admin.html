@@ -6,11 +6,11 @@
     <title>Admin Portal | Memory Rehab Lab</title>
     <meta name="robots" content="noindex, nofollow" />
     <!-- Favicon & App Icons (Official Memory Rehab Botanical Leaves) -->
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png" />
-    <link rel="apple-touch-icon" sizes="192x192" href="favicon-192x192.png" />
-    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v=2" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=2" />
+    <link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png?v=2" />
+    <link rel="apple-touch-icon" sizes="192x192" href="favicon-192x192.png?v=2" />
+    <link rel="shortcut icon" href="favicon.ico?v=2" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -1202,7 +1202,9 @@
       });
 
       adminLogoutBtn?.addEventListener('click', () => {
-        auth.signOut();
+        if (auth) {
+          auth.signOut().catch(() => {});
+        }
         localStorage.removeItem('mr_current_user');
         sessionStorage.removeItem('mr_admin_passkey');
         adminAuthGate.style.display = 'block';
@@ -2279,8 +2281,9 @@
           }
         }
 
-        currentProducts[activeEditingId] = {
-          ...(currentProducts[activeEditingId] || {}),
+        const savedId = activeEditingId;
+        currentProducts[savedId] = {
+          ...(currentProducts[savedId] || {}),
           ...updatedData
         };
 
@@ -2295,7 +2298,9 @@
 
         // 2. Cloud Sync in Background
         try {
-          await db.collection('products').doc(activeEditingId).set(currentProducts[activeEditingId], { merge: true });
+          if (db && savedId) {
+            await db.collection('products').doc(savedId).set(currentProducts[savedId], { merge: true });
+          }
         } catch(err) {
           console.warn('Cloud sync notice (offline/permissions):', err.message);
         } finally {

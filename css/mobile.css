@@ -620,9 +620,9 @@
 }
 
 
-/* Global overflow prevention — critical for mobile */
+/* Global overflow prevention — clip preserves position: sticky */
 html, body {
-  overflow-x: hidden;
+  overflow-x: clip;
   max-width: 100%;
 }
 
@@ -950,9 +950,14 @@ html, body {
   .card-content-wrap {
     padding: 10px 10px 12px !important;
   }
+  .card-media-wrap {
+    height: 245px !important;
+  }
   .card-media-wrap img {
-    height: 150px;
-    object-fit: cover;
+    height: 100% !important;
+    width: 100% !important;
+    object-fit: cover !important;
+    object-position: center 25% !important;
   }
   .card-category-row {
     flex-direction: column !important;
@@ -975,7 +980,9 @@ html, body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    display: block;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
     max-width: 100%;
   }
   /* Hide long-form content on mobile cards — tap for details */
@@ -1016,8 +1023,12 @@ html, body {
   .product-cards-grid {
     grid-template-columns: 1fr !important;
   }
+  .card-media-wrap {
+    height: 310px !important;
+  }
   .card-media-wrap img {
-    height: 200px;
+    height: 100% !important;
+    object-position: center 25% !important;
   }
 }
 
@@ -1385,7 +1396,7 @@ html, body {
    -------------------------------------------------------------------------- */
 @media (max-width: 900px) {
   html, body {
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
     max-width: 100% !important;
     width: 100% !important;
   }

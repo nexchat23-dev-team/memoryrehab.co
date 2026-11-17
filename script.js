@@ -734,7 +734,7 @@ function syncWishlistCardButtons() {
       pdpBtn.classList.add('active');
       pdpBtn.innerHTML = `
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
         </svg>
         <span>Saved to Routine Wishlist</span>
       `;
@@ -742,7 +742,7 @@ function syncWishlistCardButtons() {
       pdpBtn.classList.remove('active');
       pdpBtn.innerHTML = `
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
         </svg>
         <span>Save to Routine Wishlist</span>
       `;
@@ -808,19 +808,21 @@ function initWishlistPage() {
         return `
           <article class="product-card" data-id="${p.id}" data-name="${p.name}" data-price="${price}" data-image="${p.image}">
             <div class="card-media-wrap">
-              <span class="step-badge">${p.step || 'Routine Step'}</span>
+              <div class="card-badge-row">
+                <span class="step-badge">${p.step || 'Routine Step'}</span>
+              </div>
               <button class="card-wishlist-btn" type="button" aria-label="Save to wishlist">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                 </svg>
               </button>
-              <a href="product.html?id=${p.id}"><img src="${p.image}" alt="${p.name}" width="400" height="300" loading="lazy" /></a>
+              <a href="product.html?id=${p.id}"><img src="${p.image}" alt="${p.name}" width="400" height="300" loading="lazy" decoding="async" /></a>
             </div>
             <div class="card-content-wrap">
               <h3 class="card-title"><a href="product.html?id=${p.id}">${p.name}</a></h3>
               <div class="card-footer-row">
                 <span class="current-price">${formatCurrency(price)}</span>
-                <button class="card-add-cart-btn" type="button" onclick="if(window.addToCart){window.addToCart(window.MEMORY_REHAB_CATALOG['${p.id}']);}">
+                <button class="card-add-cart-btn" type="button">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
                     <circle cx="9" cy="21" r="1"></circle>
                     <circle cx="20" cy="21" r="1"></circle>
@@ -854,7 +856,7 @@ function initWishlistPage() {
             <button type="button" class="wishlist-card-remove-btn" data-id="${item.id}" aria-label="Remove ${item.name} from wishlist" title="Remove from wishlist">✕</button>
             ${hasDiscount ? `<span class="wishlist-discount-badge">SAVE ${discountPercent}%</span>` : ''}
             <a href="product.html?id=${item.id}">
-              <img src="${item.image || 'photo_2026-09-09_17-33-58.jpg'}" alt="${item.name}" class="wishlist-card-img" />
+              <img src="${item.image || 'photo_2026-09-09_17-33-58.jpg'}" alt="${item.name}" class="wishlist-card-img" loading="lazy" decoding="async" />
             </a>
           </div>
           <div class="wishlist-card-body">
@@ -1545,7 +1547,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const checkoutModal = document.getElementById('checkoutModal');
-      if (checkoutModal) checkoutModal.style.display = 'block';
+      if (checkoutModal) checkoutModal.style.display = 'grid';
       await refreshCheckoutSummary();
     });
   }
@@ -1839,8 +1841,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Play celebration sound if available
     try {
-      if (window.MemoryRehabFX && window.MemoryRehabFX.SoundFX && typeof window.MemoryRehabFX.SoundFX.play === 'function') {
-        window.MemoryRehabFX.SoundFX.play('chime');
+      if (window.MemoryRehabFX && window.MemoryRehabFX.SoundFX && typeof window.MemoryRehabFX.SoundFX.playCelebration === 'function') {
+        window.MemoryRehabFX.SoundFX.playCelebration();
       }
     } catch(e) {}
 
@@ -2125,15 +2127,21 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       e.stopPropagation();
       const card = addBtn.closest('.product-card');
-      if (!card) return;
-      const product = {
-        id: card.dataset.id,
-        name: card.dataset.name,
-        price: Number(card.dataset.price || card.getAttribute('data-price') || 0),
-        image: card.dataset.image || card.getAttribute('data-image'),
-        size: card.dataset.size
-      };
-      addToCart(product);
+      if (card) {
+        const product = {
+          id: card.dataset.id,
+          name: card.dataset.name,
+          price: Number(card.dataset.price || card.getAttribute('data-price') || 0),
+          image: card.dataset.image || card.getAttribute('data-image'),
+          size: card.dataset.size
+        };
+        addToCart(product);
+        return;
+      }
+      const btnId = addBtn.dataset.id || addBtn.getAttribute('data-id');
+      if (btnId && window.MEMORY_REHAB_CATALOG && window.MEMORY_REHAB_CATALOG[btnId]) {
+        addToCart(window.MEMORY_REHAB_CATALOG[btnId]);
+      }
       return;
     }
     // Wishlist toggle (delegated)
@@ -2397,7 +2405,7 @@ document.addEventListener('DOMContentLoaded', () => {
           pdpWishlistBtn.classList.add('active');
           pdpWishlistBtn.innerHTML = `
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
             </svg>
             <span>Saved to Routine Wishlist</span>
           `;
@@ -2405,7 +2413,7 @@ document.addEventListener('DOMContentLoaded', () => {
           pdpWishlistBtn.classList.remove('active');
           pdpWishlistBtn.innerHTML = `
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
             </svg>
             <span>Save to Routine Wishlist</span>
           `;
@@ -2618,21 +2626,59 @@ function initRitualVideoPlayer() {
     });
   }
 
-  // Mobile autoplay assurance & complete muting
+  // Lazy viewport-aware muted autoplay (zero offscreen GPU decoding or eager 1.7MB download)
   video.defaultMuted = true;
   video.muted = true;
-  video.volume = 0;
-  const playPromise = video.play();
-  if (playPromise !== undefined) {
-    playPromise.catch(() => {
-      const playOnFirstInteraction = () => {
-        video.play().catch(() => {});
-      };
-      window.addEventListener('touchstart', playOnFirstInteraction, { once: true, passive: true });
-      window.addEventListener('scroll', playOnFirstInteraction, { once: true, passive: true });
-      window.addEventListener('click', playOnFirstInteraction, { once: true });
-    });
+  video.volume = 1;
+  let userPaused = false;
+  let isInView = false;
+
+  if (playToggle) {
+    playToggle.addEventListener('click', () => {
+      userPaused = !video.paused;
+    }, true);
   }
+
+  function tryPlayInView() {
+    if (!isInView || userPaused || document.hidden) return;
+    const p = video.play();
+    if (p !== undefined) {
+      p.catch(() => {
+        const playOnInteract = () => {
+          if (isInView && !userPaused && !document.hidden) {
+            video.play().catch(() => {});
+          }
+        };
+        window.addEventListener('touchstart', playOnInteract, { once: true, passive: true });
+        window.addEventListener('click', playOnInteract, { once: true });
+      });
+    }
+  }
+
+  if ('IntersectionObserver' in window) {
+    const vidObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        isInView = entry.isIntersecting;
+        if (isInView) {
+          tryPlayInView();
+        } else if (!video.paused) {
+          video.pause();
+        }
+      });
+    }, { rootMargin: '120px 0px', threshold: 0.15 });
+    vidObserver.observe(video);
+  } else {
+    isInView = true;
+    tryPlayInView();
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && !video.paused) {
+      video.pause();
+    } else if (!document.hidden && isInView && !userPaused) {
+      tryPlayInView();
+    }
+  });
 
   video.addEventListener('play', () => {
     if (pauseIcon) pauseIcon.style.display = 'block';
@@ -2644,10 +2690,11 @@ function initRitualVideoPlayer() {
     if (playIcon) playIcon.style.display = 'block';
   });
 
-  // Mute / Unmute Toggle
+  // Mute / Unmute Toggle (ensures volume is 1 when unmuted)
   if (muteToggle) {
     muteToggle.addEventListener('click', () => {
       video.muted = !video.muted;
+      if (!video.muted) video.volume = 1;
       if (video.muted) {
         if (mutedIcon) mutedIcon.style.display = 'block';
         if (soundIcon) soundIcon.style.display = 'none';

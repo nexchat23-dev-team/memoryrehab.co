@@ -86,6 +86,7 @@ html {
     width: 38px !important;
     height: 38px !important;
     min-width: 38px !important;
+    min-height: 38px !important;
     border-radius: 50% !important;
     background: var(--glass-bg) !important;
     border: 1px solid var(--glass-border) !important;
@@ -281,6 +282,7 @@ html {
     width: 34px !important;
     height: 34px !important;
     min-width: 34px !important;
+    min-height: 34px !important;
   }
   .brand-logo-img {
     max-width: 75px !important;
@@ -383,14 +385,16 @@ html {
   }
   .card-media-wrap {
     border-radius: 18px 18px 0 0;
+    height: 245px !important;
     overflow: hidden;
     position: relative;
     background: #f4ecf0;
   }
   .card-media-wrap img {
-    height: 180px !important;
-    width: 100%;
-    object-fit: cover;
+    height: 100% !important;
+    width: 100% !important;
+    object-fit: cover !important;
+    object-position: center 25% !important;
     display: block;
   }
   .card-content-wrap {
@@ -399,7 +403,10 @@ html {
     display: flex;
     flex-direction: column;
   }
-  .card-summary, .card-ingredient-chips, .card-quick-view-btn, .skin-type-tag {
+  .product-card .card-summary,
+  .product-card .card-ingredient-chips,
+  .product-card .card-quick-view-btn,
+  .product-card .skin-type-tag {
     display: none !important;
   }
   .card-category-row {
@@ -540,12 +547,14 @@ html {
     height: 15px !important;
   }
 }
-@media (max-width: 359px) {
-  .product-cards-grid { grid-template-columns: 1fr !important; }
-  .card-media-wrap img { height: 210px !important; }
+@media (max-width: 360px) {
+  .product-cards-grid,
+  body.platform-android .product-cards-grid { grid-template-columns: 1fr !important; }
+  .card-media-wrap { height: 310px !important; }
+  .card-media-wrap img { height: 100% !important; object-position: center 25% !important; }
 }
 
-/* 6. WHATSAPP FLOATING BUTTON - Clean 48px circle, no vertical text spill */
+/* 6. WHATSAPP FLOATING BUTTON - Clean 48px circle, no vertical text spill, GPU-friendly */
 .whatsapp-float-btn { display: none; }
 @media (max-width: 900px) {
   .whatsapp-float-btn,
@@ -565,10 +574,12 @@ html {
     color: #ffffff !important;
     align-items: center !important;
     justify-content: center !important;
-    box-shadow: 0 6px 20px rgba(37,211,102,0.45) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 6px 18px rgba(37,211,102,0.42) !important;
     text-decoration: none !important;
-    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-    animation: wa-pulse 3s ease infinite !important;
+    transition: transform 0.2s ease !important;
+    animation: none !important;
   }
   .floating-whatsapp-btn span,
   .floating-whatsapp-btn .whatsapp-pulse-dot,
@@ -739,39 +750,72 @@ html {
   .badge-rating { font-size: 0.65rem !important; }
 }
 
-/* 10. PERFORMANCE - disable heavy effects on low-end mobile */
+/* 10. PERFORMANCE - 60fps Anti-Lag engine on mobile (<= 900px) */
 @media (max-width: 900px) {
-  .glass-card, .product-card, .school-glass-card, .ritual-video-card, .bundle-glass-panel {
+  .glass-card, .product-card, .school-glass-card, .ritual-video-card, .bundle-glass-panel,
+  .mobile-bottom-nav, .header-inner, .bubble-marquee-bar, .filter-tabs-bar,
+  .step-badge, .card-badge, .card-wishlist-btn, .card-quick-view-btn,
+  .ritual-steps-bar, .ritual-ctrl-btn, .ritual-time-badge,
+  .ba-wrapper, .ba-badge-label, .hero-floating-step-badge, .hero-takeover-stats-bar,
+  .hero-content, .floating-glass-badge, .social-proof-toast,
+  .pdp-gallery-wrap, .pdp-buy-box, .pdp-metric-glass-card, .pdp-active-glass-card,
+  .ritual-step-box, .pdp-inci-glass-box, .reviews-summary-row, .review-auth-gate,
+  .review-write-form, .firebase-review-card, .wishlist-card, .wishlist-step-badge,
+  .wishlist-card-remove-btn {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+  }
+  .glass-card, .product-card, .school-glass-card, .ritual-video-card, .bundle-glass-panel,
+  .mobile-bottom-nav, .header-inner, .ba-wrapper, .pdp-gallery-wrap, .pdp-buy-box,
+  .pdp-metric-glass-card, .pdp-active-glass-card, .ritual-step-box, .pdp-inci-glass-box,
+  .reviews-summary-row, .review-auth-gate, .review-write-form, .firebase-review-card,
+  .wishlist-card {
     background: rgba(255, 255, 255, 0.96) !important;
   }
   [data-theme="dark"] .glass-card, [data-theme="dark"] .product-card,
   [data-theme="dark"] .school-glass-card, [data-theme="dark"] .ritual-video-card,
-  [data-theme="dark"] .bundle-glass-panel,
+  [data-theme="dark"] .bundle-glass-panel, [data-theme="dark"] .mobile-bottom-nav,
+  [data-theme="dark"] .header-inner, [data-theme="dark"] .ba-wrapper,
+  [data-theme="dark"] .pdp-gallery-wrap, [data-theme="dark"] .pdp-buy-box,
+  [data-theme="dark"] .pdp-metric-glass-card, [data-theme="dark"] .pdp-active-glass-card,
+  [data-theme="dark"] .ritual-step-box, [data-theme="dark"] .pdp-inci-glass-box,
+  [data-theme="dark"] .reviews-summary-row, [data-theme="dark"] .review-auth-gate,
+  [data-theme="dark"] .review-write-form, [data-theme="dark"] .firebase-review-card,
+  [data-theme="dark"] .wishlist-card,
   .dark-mode .glass-card, .dark-mode .product-card,
   .dark-mode .school-glass-card, .dark-mode .ritual-video-card,
-  .dark-mode .bundle-glass-panel {
+  .dark-mode .bundle-glass-panel, .dark-mode .mobile-bottom-nav,
+  .dark-mode .header-inner, .dark-mode .ba-wrapper,
+  .dark-mode .pdp-gallery-wrap, .dark-mode .pdp-buy-box,
+  .dark-mode .pdp-metric-glass-card, .dark-mode .pdp-active-glass-card,
+  .dark-mode .ritual-step-box, .dark-mode .pdp-inci-glass-box,
+  .dark-mode .reviews-summary-row, .dark-mode .review-auth-gate,
+  .dark-mode .review-write-form, .dark-mode .firebase-review-card,
+  .dark-mode .wishlist-card {
     background: rgba(18, 23, 36, 0.96) !important;
   }
+  .product-card, .hero-glass-card, .bundle-step-card, .ritual-card {
+    transform-style: flat !important;
+    backface-visibility: visible !important;
+  }
   .product-card:hover { transform: none !important; box-shadow: var(--shadow-md) !important; }
-  .ambient-orb-1, .ambient-orb-2, .ambient-orb-3 { display: none !important; }
+  .ambient-container, .ambient-orb-1, .ambient-orb-2, .ambient-orb-3 { display: none !important; }
   html { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
 }
 
 /* 11. ANDROID CHROME QUIRKS */
 @media (max-width: 900px) {
-  body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+  body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeSpeed; }
   * { -webkit-tap-highlight-color: rgba(244, 139, 179, 0.15); tap-highlight-color: rgba(244, 139, 179, 0.15); }
   input, select, textarea { font-size: 16px !important; }
 
-  /* Lift social proof toast above mobile bottom nav */
+  /* Lift social proof toast above mobile bottom nav and keep clear of WhatsApp FAB */
   .social-proof-toast {
     bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
     left: 12px !important;
-    right: 12px !important;
+    right: 72px !important;
     width: auto !important;
-    max-width: calc(100% - 24px) !important;
+    max-width: calc(100% - 84px) !important;
     padding: 10px 12px !important;
     z-index: var(--z-floating, 890) !important;
   }
